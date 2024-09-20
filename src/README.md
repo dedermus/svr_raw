@@ -5,6 +5,10 @@ SVR RAW для Open-Admin
 
 ```
 $ composer require svr/raw
+
+$ php artisan migrate --path=vendor/svr/raw/database/migrations
+
+$ php artisan admin:import svr
 ```
 ## Добавление пунктов меню.
 ```
