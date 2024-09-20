@@ -11,12 +11,15 @@ class RawServiceProvider extends ServiceProvider
      */
     public function boot(RawManager $extension)
     {
-        if (! RawManager::boot()) {
-            return ;
+
+        if ($this->app->runningInConsole()) {
+            $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         }
 
-        $this->app->booted(function () {
-            RawManager::routes(__DIR__.'/../routes/web.php');
-        });
+//        $this->app->booted(function () {
+//            RawManager::routes(__DIR__.'/../routes/web.php');
+//        });
+
+        RawManager::boot();
     }
 }
