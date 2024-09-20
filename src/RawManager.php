@@ -8,15 +8,6 @@ use OpenAdminCore\Admin\Extension;
 
 class RawManager extends Extension
 {
-//
-//
-//    public $name = 'srv-raw';
-//
-//    public $menu = [
-//        'title' => 'SVR',
-//        'path'  => 'SVR',
-//        'icon'  => 'icon-wrench',
-//    ];
 
     /**
      * Bootstrap this package.
@@ -41,9 +32,9 @@ class RawManager extends Extension
         parent::routes(function ($router) {
             /* @var \Illuminate\Routing\Router $router */
 
-            $router->resource('svr/raw_milk', 'Svr\Raw\Controllers\FromSelexSheepController');
-            $router->resource('svr/raw_beef', 'Svr\Raw\Controllers\FromSelexBeefController');
-            $router->resource('svr/raw_sheep', 'Svr\Raw\Controllers\FromSelexMilkController');
+            $router->resource('svr/raw/milk', 'Svr\Raw\Controllers\FromSelexSheepController');
+            $router->resource('svr/raw/beef', 'Svr\Raw\Controllers\FromSelexBeefController');
+            $router->resource('svr/raw/sheep', 'Svr\Raw\Controllers\FromSelexMilkController');
         });
     }
 
@@ -65,32 +56,42 @@ class RawManager extends Extension
 
         $root = Menu::create($root);
 
+        $sub_root = [
+            'parent_id' => $root->id,
+            'order'     => $lastOrder++,
+            'title'     => 'RAW',
+            'icon'      => 'icon-cogs',
+            'uri'       => '',
+        ];
+
+        $sub_root = Menu::create($sub_root);
+
 
         $menus = [
             [
-                'title'     => 'RAW SHEEP',
+                'title'     => 'SHEEP',
                 'icon'      => 'icon-database',
-                'uri'       => 'svr/raw_sheep',
+                'uri'       => 'svr/raw/sheep',
             ],
             [
-                'title'     => 'RAW BEEF',
+                'title'     => 'BEEF',
                 'icon'      => 'icon-database',
-                'uri'       => 'svr/raw_beef',
+                'uri'       => 'svr/raw/beef',
             ],
             [
-                'title'     => 'RAW MILK',
+                'title'     => 'MILK',
                 'icon'      => 'icon-database',
-                'uri'       => 'svr/raw_milk',
+                'uri'       => 'svr/raw/milk',
             ],
         ];
 
         foreach ($menus as $menu) {
-            $menu['parent_id'] = $root->id;
+            $menu['parent_id'] = $sub_root->id;
             $menu['order'] = $lastOrder++;
 
             Menu::create($menu);
         }
 
-        parent::createPermission('Exceptions SVR-RAW', 'svr.raw', 'svr/*');
+        parent::createPermission('Exceptions SVR-RAW', 'svr.raw', 'svr/raw/*');
     }
 }

@@ -8,7 +8,7 @@ $ composer require svr/raw
 
 $ php artisan migrate --path=vendor/svr/raw/database/migrations
 
-$ php artisan admin:import svr
+$ php artisan admin:import svr/raw
 ```
 ## Добавление пунктов меню.
 ```
