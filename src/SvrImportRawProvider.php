@@ -1,6 +1,6 @@
 <?php
 
-namespace Svr\ImportRaw;
+namespace Svr\Raw;
 
 use Illuminate\Support\ServiceProvider;
 

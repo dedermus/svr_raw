@@ -1,6 +1,6 @@
 <?php
 
-namespace Svr\ImportRaw\Models;
+namespace Svr\Raw\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
