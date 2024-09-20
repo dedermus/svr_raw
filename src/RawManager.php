@@ -8,15 +8,15 @@ use OpenAdminCore\Admin\Extension;
 
 class RawManager extends Extension
 {
-
-
-    public $name = 'srv-raw';
-
-    public $menu = [
-        'title' => 'SVR',
-        'path'  => 'SVR',
-        'icon'  => 'icon-wrench',
-    ];
+//
+//
+//    public $name = 'srv-raw';
+//
+//    public $menu = [
+//        'title' => 'SVR',
+//        'path'  => 'SVR',
+//        'icon'  => 'icon-wrench',
+//    ];
 
     /**
      * Bootstrap this package.
