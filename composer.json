@@ -12,13 +12,13 @@
     ],
     "autoload": {
         "psr-4": {
-            "Srv\\Raw\\": "src/"
+            "Svr\\Raw\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Srv\\Raw\\RawServiceProvider"
+                "Svr\\Raw\\RawServiceProvider"
             ]
         }
     },
