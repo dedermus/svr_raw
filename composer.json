@@ -3,6 +3,7 @@
     "description": "SVR RAW - A simple Laravel package.",
     "type": "project",
     "license": "GPL-3.0-or-later",
+    "homepage": "https://github.com/Spirit412/svr_raw",
     "authors": [
         {
             "name": "Domanskiy Aleksandr",
@@ -11,8 +12,14 @@
     ],
     "autoload": {
         "psr-4": {
-            "App\\": "app/",
             "Srv\\Raw\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Srv\\Raw\\RawServiceProvider"
+            ]
         }
     },
     "require": {
