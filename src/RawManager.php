@@ -18,7 +18,7 @@ class RawManager extends Extension
     {
         static::registerRoutes();
 
-        Admin::extend('SVR', __CLASS__);
+        Admin::extend('svr-raw', __CLASS__);
     }
 
 
