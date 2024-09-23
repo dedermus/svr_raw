@@ -3,6 +3,7 @@
 namespace Svr\Raw;
 
 use OpenAdminCore\Admin\Admin;
+use OpenAdminCore\Admin\Auth\Database\Permission;
 use OpenAdminCore\Admin\Auth\Database\Menu;
 use OpenAdminCore\Admin\Extension;
 
@@ -53,43 +54,38 @@ class RawManager extends Extension
             'icon'      => 'icon-cogs',
             'uri'       => 'raw',
         ];
-//        Если есть пункт меню, удаляем его
-        if (Menu::where('uri', 'raw')->exists()) {
-            Menu::all()->where('uri', 'raw')->first()->delete();
+//        Если нет пункта в меню, добавляем его
+        if (!Menu::where('uri', 'raw')->exists()) {
+            $root = Menu::create($root);
+
+            $menus = [
+                [
+                    'title'     => 'Селекс - молоко',
+                    'icon'      => 'icon-database',
+                    'uri'       => 'raw/import_selex_milk',
+                ],
+                [
+                    'title'     => 'Селекс - мясо',
+                    'icon'      => 'icon-database',
+                    'uri'       => 'raw/import_selex_beef',
+                ],
+                [
+                    'title'     => 'Селекс - овцы',
+                    'icon'      => 'icon-database',
+                    'uri'       => 'raw/import_selex_sheep',
+                ],
+            ];
+
+            foreach ($menus as $menu) {
+                $menu['parent_id'] = $root->id;
+                $menu['order'] = $lastOrder++;
+
+                Menu::create($menu);
+            }
         }
-        $root = Menu::create($root);
-
-        $menus = [
-            [
-                'title'     => 'Селекс - молоко',
-                'icon'      => 'icon-database',
-                'uri'       => 'raw/import_selex_milk',
-            ],
-            [
-                'title'     => 'Селекс - мясо',
-                'icon'      => 'icon-database',
-                'uri'       => 'raw/import_selex_beef',
-            ],
-            [
-                'title'     => 'Селекс - овцы',
-                'icon'      => 'icon-database',
-                'uri'       => 'raw/import_selex_sheep',
-            ],
-        ];
-
-        foreach ($menus as $menu) {
-            $menu['parent_id'] = $root->id;
-            $menu['order'] = $lastOrder++;
-
-            Menu::create($menu);
-        }
-//      Добавляем разрешения если нет
-        if (!parent::getPermissionValidationRules()) {
+//      Установка разрешения на роуты по слагу если его нет
+        if (!Permission::where('slug', 'svr.raw')->exists()) {
             parent::createPermission('Exceptions SVR-RAW', 'svr.raw', 'raw/*');
         }
-//      Удаляем разрешения по слагу если есть
-//        if (Permission::where('slug', 'svr.raw')->exists()) {
-//            Permission::where('slug', 'svr.raw')->delete();
-//        }
     }
 }
