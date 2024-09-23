@@ -83,7 +83,13 @@ class RawManager extends Extension
 
             Menu::create($menu);
         }
-
-        parent::createPermission('Exceptions SVR-RAW', 'svr.raw', 'raw/*');
+//      Добавляем разрешения если нет
+        if (!parent::getPermissionValidationRules()) {
+            parent::createPermission('Exceptions SVR-RAW', 'svr.raw', 'raw/*');
+        }
+//      Удаляем разрешения по слагу если есть
+//        if (Permission::where('slug', 'svr.raw')->exists()) {
+//            Permission::where('slug', 'svr.raw')->delete();
+//        }
     }
 }
