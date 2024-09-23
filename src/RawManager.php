@@ -32,9 +32,9 @@ class RawManager extends Extension
         parent::routes(function ($router) {
             /* @var \Illuminate\Routing\Router $router */
 
-            $router->resource('svr/raw/milk', 'Svr\Raw\Controllers\FromSelexSheepController');
-            $router->resource('svr/raw/beef', 'Svr\Raw\Controllers\FromSelexBeefController');
-            $router->resource('svr/raw/sheep', 'Svr\Raw\Controllers\FromSelexMilkController');
+            $router->resource('raw/import_selex_milk', 'Svr\Raw\Controllers\FromSelexSheepController');
+            $router->resource('raw/import_selex_beef', 'Svr\Raw\Controllers\FromSelexBeefController');
+            $router->resource('raw/import_selex_sheep', 'Svr\Raw\Controllers\FromSelexMilkController');
         });
     }
 
@@ -49,49 +49,41 @@ class RawManager extends Extension
         $root = [
             'parent_id' => 0,
             'order'     => $lastOrder++,
-            'title'     => 'SVR',
+            'title'     => 'СВР - отладка импорта',
             'icon'      => 'icon-cogs',
-            'uri'       => '',
+            'uri'       => 'raw',
         ];
-
+//        Если есть пункт меню, удаляем его
+        if (Menu::where('uri', 'raw')->exists()) {
+            Menu::all()->where('uri', 'raw')->first()->delete();
+        }
         $root = Menu::create($root);
-
-        $sub_root = [
-            'parent_id' => $root->id,
-            'order'     => $lastOrder++,
-            'title'     => 'RAW',
-            'icon'      => 'icon-cogs',
-            'uri'       => '',
-        ];
-
-        $sub_root = Menu::create($sub_root);
-
 
         $menus = [
             [
-                'title'     => 'SHEEP',
+                'title'     => 'Селекс - молоко',
                 'icon'      => 'icon-database',
-                'uri'       => 'svr/raw/sheep',
+                'uri'       => 'raw/import_selex_milk',
             ],
             [
-                'title'     => 'BEEF',
+                'title'     => 'Селекс - мясо',
                 'icon'      => 'icon-database',
-                'uri'       => 'svr/raw/beef',
+                'uri'       => 'raw/import_selex_beef',
             ],
             [
-                'title'     => 'MILK',
+                'title'     => 'Селекс - овцы',
                 'icon'      => 'icon-database',
-                'uri'       => 'svr/raw/milk',
+                'uri'       => 'raw/import_selex_sheep',
             ],
         ];
 
         foreach ($menus as $menu) {
-            $menu['parent_id'] = $sub_root->id;
+            $menu['parent_id'] = $root->id;
             $menu['order'] = $lastOrder++;
 
             Menu::create($menu);
         }
 
-        parent::createPermission('Exceptions SVR-RAW', 'svr.raw', 'svr/raw/*');
+        parent::createPermission('Exceptions SVR-RAW', 'svr.raw', 'raw/*');
     }
 }
