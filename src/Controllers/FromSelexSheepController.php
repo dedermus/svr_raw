@@ -160,6 +160,11 @@ class FromSelexSheepController extends AdminController
 
         $form->number('ANIMAL_VID_COD', __('ANIMAL_VID_COD'))->help(trans('svr.animal_vid_cod'))->default(17)->rules('required|integer', ['integer' => trans('svr.validation.integer')]);
 
+        $form->select('ANIMAL_VID_COD', __('ANIMAL_VID_COD'))->options([
+            26 => 'Код 26 - селекс-овцы',
+            17 => 'Код 17 - селекс-мясо',
+        ])->default(17)->help(trans('svr.animal_vid_cod'))->rules('required|integer', ['integer' => trans('svr.validation.integer')]);
+
         $form->text('KLICHKA', __('KLICHKA'))->help(trans('svr.klichka'))->rules('max:50|nullable', ['max' => trans('svr.validation.max')]);
         $form->text('POL', __('POL'))->help(trans('svr.pol'))->rules('max:30|nullable', ['max' => trans('svr.validation.max')]);
         $form->number('NPOL', __('NPOL'))->help(trans('svr.npol'))->rules('integer|nullable', ['integer' => trans('svr.validation.integer')]);

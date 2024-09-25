@@ -159,7 +159,10 @@ class FromSelexMilkController extends AdminController
         $form->text('NINV3', __('NINV3'))->help(trans('svr.ninv3'))->rules('max:20|nullable', ['max' => trans('svr.validation.max')]);
         $form->text('ANIMAL_VID', __('ANIMAL_VID'))->help(trans('svr.animal_vid'))->rules('max:50|nullable', ['max' => trans('svr.validation.max')]);
 
-        $form->number('ANIMAL_VID_COD', __('ANIMAL_VID_COD'))->help(trans('svr.animal_vid_cod'))->default(17)->rules('required|integer', ['integer' => trans('svr.validation.integer')]);
+        $form->select('ANIMAL_VID_COD', __('ANIMAL_VID_COD'))->options([
+            26 => 'Код 26 - селекс-овцы',
+            17 => 'Код 17 - селекс-мясо',
+        ])->default(17)->help(trans('svr.animal_vid_cod'))->rules('required|integer', ['integer' => trans('svr.validation.integer')]);
 
         $form->text('MAST', __('MAST'))->help(trans('svr.mast'))->rules('max:30|nullable', ['max' => trans('svr.validation.max')]);
         $form->number('NMAST', __('NMAST'))->help(trans('svr.nmast'))->rules('integer|nullable', ['integer' => trans('svr.validation.integer')]);
