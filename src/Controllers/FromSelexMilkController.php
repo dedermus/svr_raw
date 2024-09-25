@@ -83,7 +83,7 @@ class FromSelexMilkController extends AdminController
         return $content
             ->title($this->title)
             ->description(trans('admin.show'))
-            ->row($this->form()->edit($id));
+            ->body($this->detail($id));
     }
 
     /**
