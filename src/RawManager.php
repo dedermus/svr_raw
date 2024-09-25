@@ -33,9 +33,9 @@ class RawManager extends Extension
         parent::routes(function ($router) {
             /* @var \Illuminate\Routing\Router $router */
 
-            $router->resource('raw/import_selex_milk', 'Svr\Raw\Controllers\FromSelexSheepController');
+            $router->resource('raw/import_selex_milk', 'Svr\Raw\Controllers\FromSelexMilkController');
             $router->resource('raw/import_selex_beef', 'Svr\Raw\Controllers\FromSelexBeefController');
-            $router->resource('raw/import_selex_sheep', 'Svr\Raw\Controllers\FromSelexMilkController');
+            $router->resource('raw/import_selex_sheep', 'Svr\Raw\Controllers\FromSelexSheepController');
         });
     }
 
