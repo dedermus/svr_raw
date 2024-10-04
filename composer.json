@@ -23,9 +23,16 @@
         }
     },
     "require": {
+        "svr/core": "^1.0",
         "php": "^8.2",
         "dedermus/open-admin-core": "^v2.0"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/Spirit412/svr_core.git"
+        }
+    ],
     "require-dev": {
         "phpunit/phpunit": "~6.0"
     }
