@@ -1,6 +1,6 @@
 {
     "name": "svr/raw",
-    "description": "SVR RAW - A simple Laravel package.",
+    "description": "SVR RAW - A simple Laravel package",
     "type": "library",
     "license": "GPL-3.0-or-later",
     "homepage": "https://github.com/dedermus/svr_raw",
