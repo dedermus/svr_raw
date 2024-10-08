@@ -11,11 +11,10 @@ class RawServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-
-        if ($this->app->runningInConsole()) {
-            $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-            $this->publishes([__DIR__.'/../resources/lang' => resource_path('lang')], 'open-admin-lang');
-        }
+        // зарегистрировать переводы
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'svr-raw-lang');
+        // зарегистрировать миграции пакета
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         RawManager::boot();
     }
