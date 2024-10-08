@@ -109,15 +109,15 @@ class FromSelexMilkController extends AdminController
             $value_name = $value['name'];
             $value_label = strtoupper($value_name);
             $trans = trans(strtolower($this->trans . $value_name));
-            match ($value) {
-                // Индивидуальные настройки для отображения колонок:created_at, update_at, raw_from_selex_beef_id
-                strtoupper('raw_from_selex_milk_id') => $grid->column($value, __(trans('ID'))),
+            match ($value_name) {
+                // Индивидуальные настройки для отображения колонок:created_at, update_at, raw_from_selex_milk_id
+                'raw_from_selex_milk_id' => $grid->column($value_name, 'ID')->help($trans)->sortable(),
 
                 $this->model_obj->getCreatedAtColumn(), $this->model_obj->getUpdatedAtColumn() => $grid
                     ->column($value_name, $value_label)
                     ->display(function ($value) {return Carbon::parse($value);})
                     ->xx_datetime()
-                    ->help($trans),
+                    ->help($trans)->sortable(),
 
                 // Отображение остальных колонок
                 default => $grid->column($value_name, $value_label)->help($trans),
@@ -128,9 +128,10 @@ class FromSelexMilkController extends AdminController
 
         // Отключение кнопки создания
         $grid->disableCreateButton();
-        // Отключение "удаление" у строк
+        // Отключение "удаление" и редактирование у строк
         $grid->actions(function (Grid\Displayers\Actions\Actions $actions) {
             $actions->disableDelete();
+            $actions->disableEdit();
         });
         return $grid;
     }
