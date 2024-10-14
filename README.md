@@ -30,6 +30,13 @@ License
 ```
 $ php artisan migrate --path=vendor/svr/raw/database/migrations
 ```
+## Seeders.
+
+Пример
+```
+$ php artisan db:seed --class=db:seed --class=Database\Seeders\FromSelexBeefSeeder
+
+```
 
 ## Пункты меню
 Устанавливаются только если отсутствуют в БД. Проверка по uri. URI должен содержать в начале `raw`
