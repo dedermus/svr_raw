@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Модель: сырые данные из Селекс для мясных коров
  *
- * @package App\Models\Raw
  */
 class FromSelexBeef extends Model
 {
@@ -97,7 +96,7 @@ class FromSelexBeef extends Model
         'POR_MATERI',                                            // Мать - порода
         'NPOR_MATERI',                                           // Мать - код породы
         'DATE_ROGD_MATERI',                                      // Мать - дата рождения
-        'system.import_status',                                  // ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)
+        'IMPORT_STATUS',                                         // ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)
         'TASK',                                                  // Код задачи берется из таблицы TASKS.NTASK (1 – молоко / 6- мясо / 4 - овцы
         'GUID_SVR',                                              // Гуид животного, который генерирует СВР в момент создания этой записи
         'ANIMALS_JSON',                                          // Сырые данные из Селекс

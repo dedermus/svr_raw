@@ -15,6 +15,8 @@ class RawServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'svr-raw-lang');
         // зарегистрировать миграции пакета
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../database/factories');
+        $this->loadMigrationsFrom(__DIR__.'/../database/seeders');
 
         RawManager::boot();
     }

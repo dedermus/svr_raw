@@ -12,7 +12,9 @@
     ],
     "autoload": {
         "psr-4": {
-            "Svr\\Raw\\": "src/"
+            "Svr\\Raw\\": "src/",
+            "Svr\\Raw\\Factories\\": "database/factories/",
+            "Svr\\Raw\\Seeders\\": "database/seeders/"
         }
     },
     "extra": {

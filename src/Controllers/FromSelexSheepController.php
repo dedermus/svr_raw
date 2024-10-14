@@ -16,10 +16,10 @@ use Svr\Raw\Models\FromSelexSheep;
 class FromSelexSheepController extends AdminController
 {
     protected $model;
-    protected $model_obj;
+    protected mixed $model_obj;
     protected $title;
-    protected $trans;
-    protected $all_columns_obj;
+    protected string $trans;
+    protected array$all_columns;
 
     public function __construct()
     {
@@ -27,7 +27,7 @@ class FromSelexSheepController extends AdminController
         $this->model_obj = new $this->model;                                                // Модель
         $this->trans = 'svr-raw-lang::raw'.'.';                                             // Переводы
         $this->title = trans($this->trans . 'raw_from_selex_sheep');                    // Заголовок
-        $this->all_columns_obj = Schema::getColumns($this->model_obj->getTable());          // Все столбцы
+        $this->all_columns = $this->model_obj->getFillable();                              // массив имён полей
     }
 
     /**
@@ -105,22 +105,21 @@ class FromSelexSheepController extends AdminController
     protected function grid(): Grid
     {
         $grid = new Grid($this->model_obj);
-        foreach ($this->all_columns_obj as $key => $value) {
-            $value_name = $value['name'];
-            $value_label = strtoupper($value_name);
-            $trans = trans(strtolower($this->trans . $value_name));
-            match ($value_name) {
+        foreach ($this->all_columns as $column_name) {
+            $value_label = strtoupper($column_name);
+            $trans = trans(strtolower($this->trans . $column_name));
+            match ($column_name) {
                 // Индивидуальные настройки для отображения колонок:created_at, update_at, raw_from_selex_sheep_id
-                'raw_from_selex_sheep_id' => $grid->column($value_name, 'ID')->help($trans)->sortable(),
+                'raw_from_selex_sheep_id' => $grid->column($column_name, 'ID')->help($trans)->sortable(),
 
                 $this->model_obj->getCreatedAtColumn(), $this->model_obj->getUpdatedAtColumn() => $grid
-                    ->column($value_name, $value_label)
+                    ->column($column_name, $value_label)
                     ->display(function ($value) {return Carbon::parse($value);})
                     ->xx_datetime()
                     ->help($trans)->sortable(),
 
                 // Отображение остальных колонок
-                default => $grid->column($value_name, $value_label)->help($trans),
+                default => $grid->column($column_name, $value_label)->help($trans),
             };
         }
         //TODO: Реализовать
@@ -145,21 +144,20 @@ class FromSelexSheepController extends AdminController
     protected function detail($id)
     {
         $show = new Show(FromSelexSheep::findOrFail($id));
-        foreach ($this->all_columns_obj as $key => $value) {
-            $value_name = $value['name'];
-            $value_label = $value_name;
-            $trans = trans(strtolower($this->trans . $value_name));
-            match ($value_name) {
+        foreach ($this->all_columns as $column_name) {
+            $value_label = $column_name;
+            $trans = trans(strtolower($this->trans . $column_name));
+            match ($column_name) {
                 // Индивидуальные настройки для отображения полей:created_at, update_at, raw_from_selex_beef_id
                 $this->model_obj->getCreatedAtColumn(), $this->model_obj->getUpdatedAtColumn() => $show
-                    ->field($value_name, $value_label)
+                    ->field($column_name, $value_label)
                     ->xx_datetime(),
 
-                'raw_from_selex_sheep_id' => $show->field($value_name, $value_label)
+                'raw_from_selex_sheep_id' => $show->field($column_name, $value_label)
                     ->xx_help(msg:$trans),
 
                 // Отображение остальных полей
-                default => $show->field($value_name, $value_label)
+                default => $show->field($column_name, $value_label)
                     ->xx_help(msg:$trans),
             };
         }
