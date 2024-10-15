@@ -29,6 +29,14 @@
         "php": "^8.2",
         "dedermus/open-admin-core": "^v2.0"
     },
+    "require-dev": {
+        "laravel/laravel": "^11",
+        "fzaninotto/faker": "~1.9",
+        "intervention/image": "~3.8",
+        "laravel/browser-kit-testing": "^7.2",
+        "spatie/phpunit-watcher": "^1.24.0",
+        "phpunit/phpunit": "^11.4.1"
+    },
     "repositories": [
         {
             "type": "vcs",

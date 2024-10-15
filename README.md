@@ -46,3 +46,10 @@ $ php artisan db:seed --class=db:seed db:seed --class=Svr\Raw\Seeders\RawSeeders
 
 ## Пункты меню
 Устанавливаются только если отсутствуют в БД. Проверка по uri. URI должен содержать в начале `raw`
+
+## Установить dev зависимости пакета.
+
+Пример
+```
+$ composer update svr\raw --dev
+```
