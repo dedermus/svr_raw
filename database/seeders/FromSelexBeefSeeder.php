@@ -1,6 +1,6 @@
 <?php
 
-namespace Svr\Raw\Database\Seeders;
+namespace Svr\Raw\Seeders;
 
 use Illuminate\Database\Seeder;
 use Svr\Raw\Models\FromSelexBeef;
@@ -14,7 +14,8 @@ class FromSelexBeefSeeder extends Seeder
     {
         $count = 500;
         $start_time = microtime(true);
-        echo "\033[1;33mSeeding: FromSelexBeefSeeder\033[0m\n";
+        require_once __DIR__ . '/../src/Models/FromSelexBeef.php';
+        echo "\033[1;33 Start seeding: FromSelexBeefSeeder \033[0m\n";
         FromSelexBeef::factory()->count($count)->create();
         echo "\033[0;32mСоздали с использованием фабрики FromSelexBeefSeeder: " . ($count) . " записей\033[0m\n";
         $end_time = microtime(true);

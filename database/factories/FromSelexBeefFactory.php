@@ -1,6 +1,6 @@
 <?php
 
-namespace Svr\Raw\Database\Factories;
+namespace Svr\Raw\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Svr\Core\Enums\ImportStatusEnum;

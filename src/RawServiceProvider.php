@@ -6,6 +6,7 @@ namespace Svr\Raw;
 use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -13,7 +14,9 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 class RawServiceProvider extends ServiceProvider
 {
-    protected $seeds_path = '/../database/seeders/';
+
+
+
 
     /**
      * {@inheritdoc}
@@ -51,18 +54,28 @@ class RawServiceProvider extends ServiceProvider
      */
     protected function isConsoleCommandContains($contain_options, $exclude_options = null) : bool
     {
-        echo "RawServiceProvider function isConsoleCommandContains\n";
+        echo "54: RawServiceProvider function isConsoleCommandContains\n";
+        echo "55: RawServiceProvider function isConsoleCommandContains contain_options: ".implode(' ', $contain_options) ."\n";
+        echo "56: RawServiceProvider function isConsoleCommandContains exclude_options: ".implode(' ', $exclude_options) ."\n";
 
         $args = Request::server('argv', null);
+
+        echo "60: RawServiceProvider function isConsoleCommandContains. Аргументы Request::server : ".implode(' ', $args) ."\n";
+
         if (is_array($args)) {
             $command = implode(' ', $args);
+            echo "67: RawServiceProvider function isConsoleCommandContains. command : ".$command ."\n";
+            echo "68: Str::contains : ".Str::contains($command, $contain_options) ."\n";
+            echo "69: !Str::contains : ".Str::contains($command, $exclude_options) ."\n";
             if (
                 Str::contains($command, $contain_options) &&
                 ($exclude_options == null || !Str::contains($command, $exclude_options))
             ) {
+                echo "74: RawServiceProvider function return true\n";
                 return true;
             }
         }
+        echo "75: RawServiceProvider function return false\n";
         return false;
     }
 
@@ -71,12 +84,12 @@ class RawServiceProvider extends ServiceProvider
      */
     protected function addSeedsAfterConsoleCommandFinished()
     {
-        echo "RawServiceProvider function addSeedsAfterConsoleCommandFinished\n";
+        echo "84: RawServiceProvider function addSeedsAfterConsoleCommandFinished\n";
         Event::listen(CommandFinished::class, function (CommandFinished $event) {
-            // Accept command in console only,
-            // exclude all commands from Artisan::call() method.
+            // Принимать команду только в консоли,
+            // исключить все команды из метода Artisan::call().
             if ($event->output instanceof ConsoleOutput) {
-                $this->addSeedsFrom(__DIR__ . $seeds_path);
+                $this->addSeedsFrom(__DIR__ . '/../database/seeders/');
             }
         });
     }
@@ -90,18 +103,34 @@ class RawServiceProvider extends ServiceProvider
      */
     protected function addSeedsFrom($seeds_path)
     {
-        echo "RawServiceProvider function addSeedsFrom. Аргумент:{$seeds_path}\n";
+        echo "103: RawServiceProvider function addSeedsFrom. Аргумент:{$seeds_path}\n";
 
         $file_names = glob( $seeds_path . '/*.php');
+        if ($file_names && file_exists($file_names[0])) {
+            echo "107: File exists: {$file_names[0]}"."\n";
+        } else {
+            echo "109: File not exists \n";
+        }
+
+        echo "107: RawServiceProvider function addSeedsFrom. file_names: ".implode(' ', $file_names) ."\n";
         foreach ($file_names as $filename)
         {
             $classes = $this->getClassesFromFile($filename);
-            foreach ($classes as $class) {
-                echo "\033[1;33mSeeding:\033[0m {$class}\n";
+            echo "117: RawServiceProvider function addSeedsFrom. classes: ".implode(' ', $classes) ."\n";
+            foreach ($classes as $_class) {
+//                $_class = 'RawSeeders';
+                echo "\033[1;33m119: Seeding:\033[0m {$_class}\n";
                 $startTime = microtime(true);
-                Artisan::call('db:seed', [ '--class' => $class, '--force' => '' ]);
+                // Проверим наличие класса по неймспейсу.
+                if (class_exists($_class)) {
+                    echo "\033[1;33m125: Class {$_class} found \033[0m\n";
+                }else{
+                    echo "\033[1;31m127: Class {$_class} not found! \031[0m\n";
+                }
+                require_once $filename;
+                Artisan::call('db:seed', [ '--class' => $_class, '--force' => '' ]);
                 $runTime = round(microtime(true) - $startTime, 2);
-                echo "\033[0;32mSeeded:\033[0m {$class} ({$runTime} seconds)\n";
+                echo "\033[0;32m Seeded:\033[0m {$_class} ({$runTime} seconds)\n";
             }
         }
     }

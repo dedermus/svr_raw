@@ -1,4 +1,4 @@
-SVR RAW для Open-Admin
+SVR RAW для Open-Admin ver:1.0.22
 =========================
 
 ## Установка
@@ -34,7 +34,7 @@ $ php artisan migrate --path=vendor/svr/raw/database/migrations
 
 Пример
 ```
-$ php artisan db:seed --class=db:seed --class=Database\Seeders\FromSelexBeefSeeder
+$ php artisan db:seed --class=db:seed --class=Svr\Raw\Seeders\FromSelexBeefSeeder
 
 ```
 
