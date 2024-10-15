@@ -4,10 +4,10 @@ namespace Svr\Raw\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Svr\Core\Enums\ImportStatusEnum;
-use Svr\Raw\Models\FromSelexBeef;
+use Svr\Raw\Models\FromSelexMilk;
 
 
-class FromSelexBeefFactory extends Factory
+class FromSelexMilkFactory extends Factory
 {
 
 
@@ -16,7 +16,7 @@ class FromSelexBeefFactory extends Factory
      *
      * @var class-string<\Illuminate\Database\Eloquent\Model>
      */
-    protected $model = FromSelexBeef::class;
+    protected $model = FromSelexMilk::class;
 
     /**
      * Define the model"s default state.
@@ -68,7 +68,7 @@ class FromSelexBeefFactory extends Factory
         "NPOR_MATERI" => $this->faker->randomNumber(2),  // "мать - код породы"
         "DATE_ROGD_MATERI" => $this->faker->date(),  // "мать - дата рождения в формате YYYY.mm.dd"
         "IMPORT_STATUS" => $this->faker->randomElement(ImportStatusEnum::get_value_list()),// "ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)"
-        "TASK" => 6,// "код задачи берется из таблицы TASKS.NTASK (1 – молоко / 6- мясо / 4 - овцы"
+        "TASK" => 1,// "код задачи берется из таблицы TASKS.NTASK (1 – молоко / 6- мясо / 4 - овцы"
         "GUID_SVR" => $this->faker->uuid(),// "гуид животного, который генерирует СВР в момент создания этой записи"
         "ANIMALS_JSON" => json_encode([
             "NIDENT" => "RU".$this->faker->randomNumber(4)."a".$this->faker->randomNumber(4),

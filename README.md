@@ -34,9 +34,15 @@ $ php artisan migrate --path=vendor/svr/raw/database/migrations
 
 Пример
 ```
-$ php artisan db:seed --class=db:seed --class=Svr\Raw\Seeders\FromSelexBeefSeeder
-
+$ php artisan db:seed --class=db:seed db:seed --class=Svr\Raw\Seeders\RawSeeders
 ```
+
+Запустит следующие три сида:
+- [FromSelexBeefSeeder.php](database%2Fseeders%2FFromSelexBeefSeeder.php)
+- [FromSelexMilkSeeder.php](database%2Fseeders%2FFromSelexMilkSeeder.php)
+- [FromSelexSheepSeeder.php](database%2Fseeders%2FFromSelexSheepSeeder.php)
+
+Создаст по 1000 записей в каждой таблице
 
 ## Пункты меню
 Устанавливаются только если отсутствуют в БД. Проверка по uri. URI должен содержать в начале `raw`

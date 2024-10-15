@@ -3,7 +3,7 @@
 namespace Svr\Raw\Seeders;
 
 use Illuminate\Database\Seeder;
-use Svr\Raw\Seeders\FromSelexBeefSeeder;
+use Svr\Raw\Seeders;
 
 class RawSeeders extends Seeder
 {
@@ -12,6 +12,8 @@ class RawSeeders extends Seeder
      */
     public function run(): void
     {
-        (new FromSelexBeefSeeder)->run();
+        (new Seeders\FromSelexMilkSeeder)->run(1000);
+        (new Seeders\FromSelexBeefSeeder)->run(1000);
+        (new Seeders\FromSelexSheepSeeder)->run(1000);
     }
 }
