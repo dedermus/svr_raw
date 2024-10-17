@@ -24,7 +24,7 @@ return new class extends Migration {
     {
         // Проверить существование схемы raw (если нет, то создать ее)
         DB::statement('CREATE SCHEMA IF NOT EXISTS raw');
-        DB::statement("COMMENT ON SCHEMA data IS 'Необработанные данные'");
+        DB::statement("COMMENT ON SCHEMA raw IS 'Необработанные данные'");
     }
 
     /**
