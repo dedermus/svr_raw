@@ -1,7 +1,10 @@
 <?php
 
-namespace SVR\Raw\Tests;
 
+namespace Svr\Raw\Tests\Unit;
+
+use CreateAdminTables;
+use CreateTestTables;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +22,7 @@ class TestCase extends BaseTestCase
      */
     public function createApplication()
     {
-        $app = require __DIR__.'/../vendor/laravel/laravel/bootstrap/app.php';
+        $app = require __DIR__ . '/../vendor/laravel/laravel/bootstrap/app.php';
 
         $app->booting(function () {
             $loader = \Illuminate\Foundation\AliasLoader::getInstance();
@@ -37,7 +40,7 @@ class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        $adminConfig = require __DIR__.'/config/admin.php';
+        $adminConfig = require __DIR__ . '/config/admin.php';
 
 //        $this->app['config']->set('database.default', env('DB_CONNECTION', 'pgsql'));
 //        $this->app['config']->set('database.connections.mysql.host', env('MYSQL_HOST', '127.0.0.1'));
@@ -55,7 +58,7 @@ class TestCase extends BaseTestCase
         $this->app['config']->set('database.connections.pgsql.username', env('DB_USERNAME', 'root'));
         $this->app['config']->set('database.connections.pgsql.password', env('DB_PASSWORD', ''));
         $this->app['config']->set('app.key', env('APP_KEY', ''));
-        $this->app['config']->set('filesystems', require __DIR__.'/config/filesystems.php');
+        $this->app['config']->set('filesystems', require __DIR__ . '/config/filesystems.php');
         $this->app['config']->set('admin', $adminConfig);
 
         foreach (Arr::dot(Arr::get($adminConfig, 'auth'), 'auth.') as $key => $value) {
@@ -74,9 +77,9 @@ class TestCase extends BaseTestCase
             require $routes;
         }
 
-        require __DIR__.'/routes.php';
+        require __DIR__ . '/routes.php';
 
-        require __DIR__.'/seeds/factory.php';
+        require __DIR__ . '/seeds/factory.php';
 
 //        \OpenAdminCore\Admin\Admin::$css = [];
 //        \OpenAdminCore\Admin\Admin::$js = [];
@@ -103,7 +106,7 @@ class TestCase extends BaseTestCase
     {
         $fileSystem = new Filesystem();
 
-        $fileSystem->requireOnce(__DIR__.'/migrations/2016_11_22_093148_create_test_tables.php');
+        $fileSystem->requireOnce(__DIR__ . '/migrations/2016_11_22_093148_create_test_tables.php');
 
         (new CreateTestTables())->up();
     }

@@ -53,3 +53,14 @@ $ php artisan db:seed --class=db:seed db:seed --class=Svr\Raw\Seeders\RawSeeders
 ```
 $ composer update svr\raw --dev
 ```
+
+DEV push new commit, tag 
+```
+git add . | git commit -m "dev tests 1.0.35" | git tag 1.0.35 | git push -fu origin --all | git push -fu origin --tags
+```
+
+Get list tag 
+```
+git tag
+```
+

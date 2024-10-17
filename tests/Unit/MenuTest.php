@@ -1,9 +1,8 @@
 <?php
 
-namespace Svr\Raw\Tests;
+namespace Svr\Raw\Tests\Unit;
 
 use OpenAdminCore\Admin\Auth\Database\Administrator;
-use OpenAdminCore\Admin\Auth\Database\Menu;
 use Svr\Raw\Tests\TestCase;
 
 class MenuTest extends TestCase
