@@ -3,20 +3,20 @@
 namespace Svr\Raw\Tests\Unit;
 
 use Svr\Raw\Tests\TestCase;
-use Svr\Raw\Models\FromSelexMilk;
+use Svr\Raw\Models\FromSelexBeef;
 use Illuminate\Support\Facades\Schema;
 
-class ModelFromSelexMilkTest extends TestCase
+class ModelFromSelexBeefTest extends TestCase
 {
 
     /**
-     * Тест на наличие ожидаемых полей в таблице raw.raw_from_selex_milk.
+     * Тест на наличие ожидаемых полей в таблице raw.raw_from_selex_beef.
      *
      * @return void
      */
-    public function testFromSelexMilkTableHasExpectedColumns()
+    public function testFromSelexBeefTableHasExpectedColumns()
     {
-        $dmodel= new FromSelexMilk();
+        $dmodel= new FromSelexBeef();
 
         $columns = Schema::getColumns($dmodel->getTable());
         // Если нет таблицы ошибка
