@@ -66,3 +66,12 @@ Get list tag
 git tag
 ```
 
+### Tests
+[docs](https://docs.phpunit.de/en/10.5/index.html)
+```
+docker compose run --rm artisan_svr_lara11 test --testsuite=all --configuration=vendor/svr/raw/phpunit.xml
+```
+Где:
+`--testsuite` это пресеты `testsuite name` в файле `phpunit.xml`
+
+`--configuration` путь до конфигурационного файла `phpunit.xml`
