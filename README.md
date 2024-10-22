@@ -35,7 +35,7 @@ $ php artisan migrate --path=vendor/svr/raw/database/migrations
 
 Пример
 
-Обратить внимание на использование `\\`
+Обратить внимание!  Использование двойного слеша: `\\` - для Linux/UNIX систем. Для OS использовать одинарный
 ```
 $ php artisan db:seed --class=Svr\\Raw\\Seeders\\RawSeeders
 ```
@@ -70,10 +70,10 @@ git tag
 ### Tests
 [docs](https://docs.phpunit.de/en/10.5/index.html)
 ```
-php artisan test --testsuite=SvrRawUnit --configuration=/var/www/html/vendor/svr/raw/phpunit.xml
+php artisan test --configuration=./vendor/svr/raw/phpunit.xml --testsuite=SvrRawUnit
 ```
 Где:
-`--testsuite` это пресеты `testsuite name` в файле `phpunit.xml`
+`--testsuite` это пресеты `testsuite name` в файле `phpunit.xml`. Например SvrRawUnit
 
 `--configuration` путь до конфигурационного файла `phpunit.xml` 
 

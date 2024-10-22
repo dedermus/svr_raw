@@ -16,6 +16,7 @@ class ModelFromSelexBeefTest extends TestCase
      */
     public function testFromSelexBeefTableHasExpectedColumns()
     {
+        echo "testFromSelexBeefTableHasExpectedColumns - Тест структуры таблицы в БД относительно модели.\n Таблица в БД должна соответствовать модели";
         $dmodel= new FromSelexBeef();
 
         $columns = Schema::getColumns($dmodel->getTable());
@@ -26,8 +27,8 @@ class ModelFromSelexBeefTest extends TestCase
         );
 
         // Получаем из модели FromSelexMilk список полей, и проверяем их наличие в таблице базы данных
-        // Ошибка вида:  
-        //  FAILED  Svr\Raw\Tests\Unit\ModelFromSelexMilkTest > from selex milk table has expected columns                                                           
+        // Ошибка вида:
+        //  FAILED  Svr\Raw\Tests\Unit\ModelFromSelexMilkTest > from selex milk table has expected columns
         //  Нет колонки raw_from_selex_milk_id  Comment: Инкремент в таблице raw.raw_from_selex_milk
 
         foreach ($columns as $column) {

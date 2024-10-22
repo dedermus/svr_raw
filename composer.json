@@ -12,24 +12,18 @@
     ],
     "autoload": {
         "classmap": [
-            "src/"
+            "src/",
+            "tests",
+            "tests/TestCase.php"
         ],
         "psr-4": {
             "Svr\\Raw\\": "src/",
             "Svr\\Raw\\Factories\\": "database/factories/",
-            "Svr\\Raw\\Seeders\\": "database/seeders/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Svr\\Raw\\": "src/",
+            "Svr\\Raw\\Seeders\\": "database/seeders/",
             "Svr\\Raw\\Tests\\": "tests/",
             "Svr\\Raw\\Tests\\Unit\\": "tests/Unit/",
-            "Svr\\Raw\\Tests\\Feature\\": "tests/Feature/"
-        },
-        "classmap": [
-            "tests"
-        ]
+            "Tests\\": "tests/"
+        }
     },
     "extra": {
         "laravel": {
@@ -41,14 +35,14 @@
     "require": {
         "svr/core": "^1.0",
         "php": "^8.2",
-        "dedermus/open-admin-core": "^v2.0"
+        "dedermus/open-admin-core": "^v2.0",
+        "laravel/browser-kit-testing": "^7.2",
+        "spatie/phpunit-watcher": "^1.24.0",
+        "phpunit/phpunit": "^11.4.1"
     },
     "require-dev": {
         "laravel/laravel": "^11",
         "fzaninotto/faker": "~1.9",
-        "intervention/image": "~3.8",
-        "laravel/browser-kit-testing": "^7.2",
-        "spatie/phpunit-watcher": "^1.24.0",
-        "phpunit/phpunit": "^11.4.1"
+        "intervention/image": "~3.8"
     }
 }
