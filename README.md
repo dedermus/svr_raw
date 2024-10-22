@@ -75,3 +75,5 @@ php artisan test --testsuite=SvrRawUnit --configuration=/var/www/html/vendor/svr
 `--testsuite` это пресеты `testsuite name` в файле `phpunit.xml`
 
 `--configuration` путь до конфигурационного файла `phpunit.xml` 
+
+token

@@ -50,12 +50,6 @@
         "laravel/browser-kit-testing": "^7.2",
         "spatie/phpunit-watcher": "^1.24.0",
         "phpunit/phpunit": "^11.4.1"
-    },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/Spirit412/svr_core.git"
-        }
-    ]
+    }
 }
 
