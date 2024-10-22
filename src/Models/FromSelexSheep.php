@@ -96,7 +96,7 @@ class FromSelexSheep extends Model
         'NINVRIGHT_MATERI',                     // мать - инвентарный номер, правое ухо
         'NINVLEFT_MATERI',                      // мать - инвентарный номер, левое ухо
         'NGOSREGISTER_MATERI',                  // мать - идентификационный номер РСХН
-        'system.import_status',                 // ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)'
+        'IMPORT_STATUS',                        // ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)'
         'TASK',                                 // Код задачи берется из таблицы TASKS.NTASK (1 – молоко / 6- мясо / 4 - овцы)
         'GUID_SVR',                             // Гуид животного, который генерирует СВР в момент создания этой записи
         'ANIMALS_JSON',                         // Сырые данные из Селекс

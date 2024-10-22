@@ -1,4 +1,4 @@
-SVR RAW для Open-Admin
+SVR RAW для Open-Admin ver:1.0.22
 =========================
 
 ## Установка
@@ -30,6 +30,48 @@ License
 ```
 $ php artisan migrate --path=vendor/svr/raw/database/migrations
 ```
+## Seeders.
+
+Пример
+
+Обратить внимание на использование `\\`
+```
+$ php artisan db:seed --class=Svr\\Raw\\Seeders\\RawSeeders
+```
+
+Запустит следующие три сида:
+- [FromSelexBeefSeeder.php](database%2Fseeders%2FFromSelexBeefSeeder.php)
+- [FromSelexMilkSeeder.php](database%2Fseeders%2FFromSelexMilkSeeder.php)
+- [FromSelexSheepSeeder.php](database%2Fseeders%2FFromSelexSheepSeeder.php)
+
+Создаст по 1000 записей в каждой таблице
 
 ## Пункты меню
 Устанавливаются только если отсутствуют в БД. Проверка по uri. URI должен содержать в начале `raw`
+
+## Установить dev зависимости пакета.
+
+Пример
+```
+$ composer update svr\raw --dev
+```
+
+DEV push new commit, tag 
+```
+git add . | git commit -m "dev tests 1.0.35" | git tag 1.0.35 | git push -fu origin --all | git push -fu origin --tags
+```
+
+Get list tag 
+```
+git tag
+```
+
+### Tests
+[docs](https://docs.phpunit.de/en/10.5/index.html)
+```
+php artisan test --testsuite=SvrRawUnit --configuration=/var/www/html/vendor/svr/raw/phpunit.xml
+```
+Где:
+`--testsuite` это пресеты `testsuite name` в файле `phpunit.xml`
+
+`--configuration` путь до конфигурационного файла `phpunit.xml` 
