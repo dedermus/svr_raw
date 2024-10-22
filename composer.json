@@ -3,7 +3,7 @@
     "description": "SVR RAW - A simple Laravel package.",
     "type": "library",
     "license": "GPL-3.0-or-later",
-    "homepage": "https://github.com/Spirit412/svr_raw",
+    "homepage": "https://github.com/dedermus/svr_raw",
     "authors": [
         {
             "name": "Domanskiy Aleksandr",
@@ -12,25 +12,25 @@
     ],
     "autoload": {
         "classmap": [
-			"src/"
-		],
+            "src/"
+        ],
         "psr-4": {
             "Svr\\Raw\\": "src/",
             "Svr\\Raw\\Factories\\": "database/factories/",
             "Svr\\Raw\\Seeders\\": "database/seeders/"
         }
     },
-	"autoload-dev": {
-		"psr-4": {
+    "autoload-dev": {
+        "psr-4": {
             "Svr\\Raw\\": "src/",
-			"Svr\\Raw\\Tests\\": "tests/",
+            "Svr\\Raw\\Tests\\": "tests/",
             "Svr\\Raw\\Tests\\Unit\\": "tests/Unit/",
             "Svr\\Raw\\Tests\\Feature\\": "tests/Feature/"
-		},
+        },
         "classmap": [
             "tests"
         ]
-	},
+    },
     "extra": {
         "laravel": {
             "providers": [
@@ -50,12 +50,5 @@
         "laravel/browser-kit-testing": "^7.2",
         "spatie/phpunit-watcher": "^1.24.0",
         "phpunit/phpunit": "^11.4.1"
-    },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/Spirit412/svr_core.git"
-        }
-    ]
+    }
 }
-
