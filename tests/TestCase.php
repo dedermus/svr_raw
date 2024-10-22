@@ -1,6 +1,6 @@
 <?php
 
-namespace Svr\Raw\Tests;
+namespace Tests;
 
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
@@ -10,5 +10,5 @@ use Laravel\BrowserKitTesting\TestCase as BaseTestCase;
 
 class TestCase extends BaseTestCase
 {
-    //
+    // тут логика всякая но не тесты
 }
