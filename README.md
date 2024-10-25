@@ -76,4 +76,10 @@ php artisan test --configuration=./vendor/svr/raw/phpunit.xml --testsuite=SvrRaw
 
 `--configuration` путь до конфигурационного файла `phpunit.xml` 
 
-token
+### Сброс кеша и дамп компосера
+
+Под Linux
+`composer dump-autoload && php artisan cache:clear`
+
+Под Win
+`composer dump-autoload || php artisan cache:clear`
