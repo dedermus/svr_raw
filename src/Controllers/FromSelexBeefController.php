@@ -105,6 +105,9 @@ class FromSelexBeefController extends AdminController
     protected function grid(): Grid
     {
         $grid = new Grid($this->model_obj);
+        // Определение порядка сортировки по убыванию
+        // link to documentation https://open-admin.org/docs/en/model-grid-column#list-order-order-by
+        $grid->model()->orderBy($grid->getKeyName(), 'desc');
         foreach ($this->all_columns as $column_name) {
             $value_label = strtoupper($column_name);
             $trans = trans(strtolower($this->trans . $column_name));
@@ -152,18 +155,18 @@ class FromSelexBeefController extends AdminController
                 $this->model_obj->getCreatedAtColumn(), $this->model_obj->getUpdatedAtColumn() => $show
                     ->field($column_name, $value_label)
                     ->xx_datetime(),
-
-                'raw_from_selex_beef_id' => $show->field($column_name, $value_label)
+                // Для отображения ключа
+                $show->getModel()->getKeyName() => $show->field($column_name, $value_label)
                     ->xx_help(msg:$trans),
-
                 // Отображение остальных полей
                 default => $show->field($column_name, $value_label)->xx_help(msg:$trans),
             };
         }
-        // Убрать кнопку "Удалить"
+        // Убрать кнопку "Удалить" и "редактировать"
         $show->panel()
             ->tools(function ($tools) {
                 $tools->disableDelete();
+                $tools->disableEdit();
             });
         return $show;
     }
@@ -175,71 +178,139 @@ class FromSelexBeefController extends AdminController
      */
     protected function form()
     {
+        $model = $this->model_obj;
         $form = new Form($this->model_obj);
-
-        $form->number('NANIMAL', __('NANIMAL'))->help(trans($this->trans . 'nanimal'))->rules('integer|nullable', ['integer' => trans('svr-core-lang::validation.integer')]);
-        $form->text('NANIMAL_TIME', __('NANIMAL_TIME'))->help(trans($this->trans . 'nanimal_time'))->rules('max:128|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->text('NINV', __('NINV'))->help(trans($this->trans . 'ninv'))->rules('max:15|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->text('KLICHKA', __('KLICHKA'))->help(trans($this->trans . 'klichka'))->rules('max:50|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->text('POL', __('POL'))->help(trans($this->trans . 'pol'))->rules('max:30|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->number('NPOL', __('NPOL'))->help(trans($this->trans . 'npol'))->rules('integer|nullable', ['integer' => trans('svr-core-lang::validation.integer')]);
-        $form->text('NGOSREGISTER', __('NGOSREGISTER'))->help(trans($this->trans . 'ngosregister'))->rules('max:50|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->text('NINV1', __('NINV1'))->help(trans($this->trans . 'ninv1'))->rules('max:15|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->text('NINV3', __('NINV3'))->help(trans($this->trans . 'ninv3'))->rules('max:20|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->text('ANIMAL_VID', __('ANIMAL_VID'))->help(trans($this->trans . 'animal_vid'))->rules('max:50|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-
-        $form->select('ANIMAL_VID_COD', __('ANIMAL_VID_COD'))->options([
-            26 => 'Код 26 - селекс-овцы',
-            17 => 'Код 17 - селекс-мясо',
-        ])->default(17)->help(trans($this->trans . 'animal_vid_cod'))->rules('required|integer', ['integer' => trans('svr-core-lang::validation.integer')]);
-
-        $form->text('MAST', __('MAST'))->help(trans($this->trans . 'mast'))->rules('max:30|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->number('NMAST', __('NMAST'))->help(trans($this->trans . 'nmast'))->rules('integer|nullable', ['integer' => trans('svr-core-lang::validation.integer')]);
-        $form->text('POR', __('POR'))->help(trans($this->trans . 'por'))->rules('max:30|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->number('NPOR', __('NPOR'))->help(trans($this->trans . 'npor'))->rules('integer|nullable', ['integer' => trans('svr-core-lang::validation.integer')]);
-        $form->date('DATE_ROGD', __('DATE_ROGD'))->help(trans($this->trans . 'date_rogd'))->rules('data|nullable', ['data' => trans('svr-core-lang::validation.data')]);
-        $form->date('DATE_POSTUPLN', __('DATE_POSTUPLN'))->help(trans($this->trans . 'date_postupln'))->rules('data|nullable', ['data' => trans('svr-core-lang::validation.data')]);
-        $form->number('NHOZ_ROGD', __('NHOZ_ROGD'))->help(trans($this->trans . 'nhoz_rogd'))->rules('integer|nullable', ['integer' => trans('svr-core-lang::validation.integer')]);
-        $form->number('NHOZ', __('NHOZ'))->help(trans($this->trans . 'nhoz'))->rules('integer|nullable', ['integer' => trans('svr-core-lang::validation.integer')]);
-        $form->number('NOBL', __('NOBL'))->help(trans($this->trans . 'nobl'))->rules('integer|nullable', ['integer' => trans('svr-core-lang::validation.integer')]);
-        $form->number('NRN', __('NRN'))->help(trans($this->trans . 'nrn'))->rules('integer|nullable', ['integer' => trans('svr-core-lang::validation.integer')]);
-        $form->text('NIDENT', __('NIDENT'))->help(trans($this->trans . 'nident'))->rules('max:20|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->text('ROGD_HOZ', __('ROGD_HOZ'))->help(trans($this->trans . 'rogd_hoz'))->rules('max:50|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->date('DATE_V', __('DATE_V'))->help(trans($this->trans . 'date_v'))->rules('data|nullable', ['data' => trans('svr-core-lang::validation.data')]);
-        $form->text('PV', __('PV'))->help(trans($this->trans . 'pv'))->rules('max:60|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->text('RASHOD', __('RASHOD'))->help(trans($this->trans . 'rashod'))->rules('max:30|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->number('GM_V', __('GM_V'))->help(trans($this->trans . 'gm_v'))->rules('integer|nullable', ['integer' => trans('svr-core-lang::validation.integer')]);
-        $form->text('ISP', __('ISP'))->help(trans($this->trans . 'isp'))->rules('max:20|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->date('DATE_CHIP', __('DATE_CHIP'))->help(trans($this->trans . 'date_chip'))->rules('data|nullable', ['data' => trans('svr-core-lang::validation.data')]);
-        $form->date('DATE_NINV', __('DATE_NINV'))->help(trans($this->trans . 'date_ninv'))->rules('data|nullable', ['data' => trans('svr-core-lang::validation.data')]);
-        $form->date('DATE_NGOSREGISTER', __('DATE_NGOSREGISTER'))->help(trans($this->trans . 'date_ngosregister'))->rules('data|nullable', ['data' => trans('svr-core-lang::validation.data')]);
-        $form->text('NINV_OTCA', __('NINV_OTCA'))->help(trans($this->trans . 'ninv_otca'))->rules('max:15|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->text('NGOSREGISTER_OTCA', __('NGOSREGISTER_OTCA'))->help(trans($this->trans . 'ngosregister_otca'))->rules('max:50|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->text('POR_OTCA', __('POR_OTCA'))->help(trans($this->trans . 'por_otca'))->rules('max:30|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->number('NPOR_OTCA', __('NPOR_OTCA'))->help(trans($this->trans . 'npor_otca'))->rules('integer|nullable', ['integer' => trans('svr-core-lang::validation.integer')]);
-        $form->date('DATE_ROGD_OTCA', __('DATE_ROGD_OTCA'))->help(trans($this->trans . 'date_rogd_otca'))->rules('data|nullable', ['data' => trans('svr-core-lang::validation.data')]);
-        $form->text('NINV_MATERI', __('NINV_MATERI'))->help(trans($this->trans . 'ninv_materi'))->rules('max:15|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->text('NGOSREGISTER_MATERI', __('NGOSREGISTER_MATERI'))->help(trans($this->trans . 'ngosregister_materi'))->rules('max:50|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->text('POR_MATERI', __('POR_MATERI'))->help(trans($this->trans . 'por_materi'))->rules('max:30|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->number('NPOR_MATERI', __('NPOR_MATERI'))->help(trans($this->trans . 'npor_materi'))->rules('integer|nullable', ['integer' => trans('svr-core-lang::validation.integer')]);
-        $form->date('DATE_ROGD_MATERI', __('DATE_ROGD_MATERI'))->help(trans($this->trans . 'date_rogd_materi'))->rules('data|nullable', ['data' => trans('svr-core-lang::validation.data')]);
+        $form->display($form->model()->getKeyName(), trans($this->trans . $form->model()->getKeyName()));
+        $form->number('NANIMAL', __('NANIMAL'))
+            ->help(trans($this->trans . 'nanimal'));
+        $form->text('NANIMAL_TIME', __('NANIMAL_TIME'))
+            ->help(trans($this->trans . 'nanimal_time'));
+        $form->text('NINV', __('NINV'))
+            ->help(trans($this->trans . 'ninv'));
+        $form->text('KLICHKA', __('KLICHKA'))
+            ->help(trans($this->trans . 'klichka'));
+        $form->text('POL', __('POL'))
+            ->help(trans($this->trans . 'pol'));
+        $form->number('NPOL', __('NPOL'))
+            ->help(trans($this->trans . 'npol'));
+        $form->text('NGOSREGISTER', __('NGOSREGISTER'))
+            ->help(trans($this->trans . 'ngosregister'));
+        $form->text('NINV1', __('NINV1'))
+            ->help(trans($this->trans . 'ninv1'));
+        $form->text('NINV3', __('NINV3'))
+            ->help(trans($this->trans . 'ninv3'));
+        $form->text('ANIMAL_VID', __('ANIMAL_VID'))
+            ->help(trans($this->trans . 'animal_vid'));
+        $form->select('ANIMAL_VID_COD', __('ANIMAL_VID_COD'))
+            ->options([
+                26 => 'Код 26 - селекс-овцы',
+                17 => 'Код 17 - селекс-мясо',
+                ])
+            ->default(17)
+            ->help(trans($this->trans . 'animal_vid_cod'));
+        $form->text('MAST', __('MAST'))
+            ->help(trans($this->trans . 'mast'));
+        $form->number('NMAST', __('NMAST'))
+            ->help(trans($this->trans . 'nmast'));
+        $form->text('POR', __('POR'))
+            ->help(trans($this->trans . 'por'));
+        $form->number('NPOR', __('NPOR'))
+            ->help(trans($this->trans . 'npor'));
+        $form->date('DATE_ROGD', __('DATE_ROGD'))
+            ->help(trans($this->trans . 'date_rogd'));
+        $form->date('DATE_POSTUPLN', __('DATE_POSTUPLN'))
+            ->help(trans($this->trans . 'date_postupln'));
+        $form->number('NHOZ_ROGD', __('NHOZ_ROGD'))
+            ->help(trans($this->trans . 'nhoz_rogd'));
+        $form->number('NHOZ', __('NHOZ'))
+            ->help(trans($this->trans . 'nhoz'));
+        $form->number('NOBL', __('NOBL'))
+            ->help(trans($this->trans . 'nobl'));
+        $form->number('NRN', __('NRN'))
+            ->help(trans($this->trans . 'nrn'));
+        $form->text('NIDENT', __('NIDENT'))
+            ->help(trans($this->trans . 'nident'));
+        $form->text('ROGD_HOZ', __('ROGD_HOZ'))
+            ->help(trans($this->trans . 'rogd_hoz'));
+        $form->date('DATE_V', __('DATE_V'))
+            ->help(trans($this->trans . 'date_v'));
+        $form->text('PV', __('PV'))
+            ->help(trans($this->trans . 'pv'));
+        $form->text('RASHOD', __('RASHOD'))
+            ->help(trans($this->trans . 'rashod'));
+        $form->number('GM_V', __('GM_V'))
+            ->help(trans($this->trans . 'gm_v'));
+        $form->text('ISP', __('ISP'))
+            ->help(trans($this->trans . 'isp'));
+        $form->date('DATE_CHIP', __('DATE_CHIP'))
+            ->help(trans($this->trans . 'date_chip'));
+        $form->date('DATE_NINV', __('DATE_NINV'))
+            ->help(trans($this->trans . 'date_ninv'));
+        $form->date('DATE_NGOSREGISTER', __('DATE_NGOSREGISTER'))
+            ->help(trans($this->trans . 'date_ngosregister'));
+        $form->text('NINV_OTCA', __('NINV_OTCA'))
+            ->help(trans($this->trans . 'ninv_otca'));
+        $form->text('NGOSREGISTER_OTCA', __('NGOSREGISTER_OTCA'))
+            ->help(trans($this->trans . 'ngosregister_otca'));
+        $form->text('POR_OTCA', __('POR_OTCA'))
+            ->help(trans($this->trans . 'por_otca'));
+        $form->number('NPOR_OTCA', __('NPOR_OTCA'))
+            ->help(trans($this->trans . 'npor_otca'));
+        $form->date('DATE_ROGD_OTCA', __('DATE_ROGD_OTCA'))
+            ->help(trans($this->trans . 'date_rogd_otca'));
+        $form->text('NINV_MATERI', __('NINV_MATERI'))
+            ->help(trans($this->trans . 'ninv_materi'));
+        $form->text('NGOSREGISTER_MATERI', __('NGOSREGISTER_MATERI'))
+            ->help(trans($this->trans . 'ngosregister_materi'));
+        $form->text('POR_MATERI', __('POR_MATERI'))
+            ->help(trans($this->trans . 'por_materi'));
+        $form->number('NPOR_MATERI', __('NPOR_MATERI'))
+            ->help(trans($this->trans . 'npor_materi'));
+        $form->date('DATE_ROGD_MATERI', __('DATE_ROGD_MATERI'))
+            ->help(trans($this->trans . 'date_rogd_materi'));
         $form->select('IMPORT_STATUS', __('IMPORT_STATUS'))
             ->options(ImportStatusEnum::get_option_list())
             ->help(trans($this->trans . 'import_status'))
-            ->default('new')
-            ->rules('required');
-
-        $form->number('TASK', __('TASK'))->help(trans($this->trans . 'task'))->rules('integer|nullable', ['integer' => trans('svr-core-lang::validation.integer')]);
-        $form->text('GUID_SVR', __('GUID_SVR'))->help(trans($this->trans . 'guid_svr'))->rules('max:64|nullable', ['max' => trans('svr-core-lang::validation.max')]);
-        $form->textarea('ANIMALS_JSON', __('ANIMALS_JSON'))->help(trans($this->trans . 'animals_json'));
-        $form->display('created_at', __('created_at'))->help(trans('svr-core-lang::svr.created_at'));
-        $form->display('update_at', __('update_at'))->help(trans('svr-core-lang::svr.updated_at'));
+            ->required()
+            ->default('new');
+        $form->number('TASK', __('TASK'))
+            ->help(trans($this->trans . 'task'));
+        $form->text('GUID_SVR', __('GUID_SVR'))
+            ->help(trans($this->trans . 'guid_svr'));
+        $form->textarea('ANIMALS_JSON', __('ANIMALS_JSON'))
+            ->help(trans($this->trans . 'animals_json'));
+        $form->display('created_at', __('created_at'))
+            ->help(trans('svr-core-lang::svr.created_at'));
+        $form->display('update_at', __('update_at'))
+            ->help(trans('svr-core-lang::svr.updated_at'));
 
         // Отключить "Продолжить создание"
         $form->disableCreatingCheck();
         // Отключить "Удалить"
         $form->tools(function (Form\Tools $tools) {
             $tools->disableDelete();
+        });
+
+        // обработка формы
+        $form->saving(function (Form $form) use ($model)
+        {
+            // создается текущая страница формы.
+            if ($form->isCreating())
+            {
+                $model->createRaw(request());
+            }
+            // обновляется текущая страница формы.
+            if ($form->isEditing())
+            {
+                // The request contains dont have the primary key and value
+                // The model contains the primary key and value
+                // Add primary key to request
+                $inputs = $this->getForm()->inputs();
+                request()->request->add([$form->model()->getKeyName() => $form->model()->getKey()]);
+                $model->updateRaw(request());
+            }
+            // Redirect to show page after save
+            return redirect(admin_url($form->resource(0)));
         });
         return $form;
     }
