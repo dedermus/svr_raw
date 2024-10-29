@@ -23,7 +23,8 @@
             "Svr\\Raw\\Tests\\": "tests/",
             "Svr\\Raw\\Tests\\Unit\\": "tests/Unit/",
             "Tests\\": "tests/"
-        }
+        },
+        "files": ["src/bootstrap/app.php"]
     },
     "extra": {
         "laravel": {
