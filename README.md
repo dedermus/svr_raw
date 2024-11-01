@@ -1,4 +1,4 @@
-SVR RAW для Open-Admin ver:1.0.46
+SVR RAW для Open-Admin ver:1.0.50
 =========================
 
 ## Установка
