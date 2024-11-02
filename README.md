@@ -1,4 +1,4 @@
-SVR RAW для Open-Admin ver:1.0.51
+SVR RAW для Open-Admin ver:1.0.52
 =========================
 
 ## Установка
@@ -36,7 +36,7 @@ $ php artisan migrate --path=vendor/svr/raw/database/migrations
 
 Обратить внимание!  Использование двойного слеша: `\\` - для Linux/UNIX систем. Для OS использовать одинарный
 ```
-$ php artisan db:seed --class=Svr\\Raw\\Seeders\\RawSeeders
+$ php artisan db:seed --class=Svr\Raw\Seeders\RawSeeders
 ```
 
 Запустит следующие три сида:
