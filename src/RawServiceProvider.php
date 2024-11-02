@@ -21,6 +21,11 @@ class RawServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__ . '/../routes/Api/api.php');
         $this->register();
 
+//        $this->app->setLocale('ru');
+//        $this->app->setFallbackLocale('ru');
+//        $this->app->setLocale('ru');
+
+
 //        Регистрируем фабрики моделей
         Factory::guessFactoryNamesUsing(function (string $modelName) {
             return 'Svr\\Raw\\Factories\\' . class_basename($modelName) . 'Factory';
@@ -36,9 +41,10 @@ class RawServiceProvider extends ServiceProvider
             // Обработка команды из терминала
         }
 
-//        $this->registerMiddleware(ApiValidationErrors::class);
+        $this->registerMiddleware(ApiValidationErrors::class);
 
-        $this->withExceptions(new ExceptionHandler());
+        // Регистрируем глобального  обработчик исключений
+//        $this->withExceptions(new ExceptionHandler());
         RawManager::boot();
     }
 

@@ -5,6 +5,7 @@ namespace Svr\Raw\Exceptions;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Container\Container;
 use Illuminate\Foundation\Configuration\Exceptions;
+use Symfony\Component\Mailer\Exception\InvalidArgumentException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Illuminate\Routing\ResponseFactory;
@@ -32,25 +33,37 @@ class ExceptionHandler
                 }
                 if ($e instanceof InvalidSignatureException) {
                     return $response->make(
-                        content: ['message' => $e->getMessage()],
+                        content: [
+                            'status' => 'error',
+                            'message' => $e->getMessage()
+                        ],
                         status: $e->getStatusCode(),
                     );
                 }
                 if ($e instanceof NotFoundHttpException) {
                     return $response->make(
-                        content: ['message' => 'Not Found.'],
+                        content: [
+                            'status' => 'error',
+                            'message' => 'Not Found.'
+                        ],
                         status: $e->getStatusCode(),
                     );
                 }
                 if ($e instanceof MethodNotAllowedHttpException) {
                     return $response->make(
-                        content: ['message' => $e->getMessage()],
+                        content: [
+                            'status' => 'error',
+                            'message' => $e->getMessage()
+                        ],
                         status: $e->getStatusCode(),
                     );
                 }
                 if ($e instanceof InvalidArgumentException) {
                     return $response->make(
-                        content: ['message' => 'Method Not Allowed.'],
+                        content: [
+                            'status' => 'error',
+                            'message' => 'Method Not Allowed.'
+                        ],
                         status: $e->getStatusCode(),
                     );
                 }

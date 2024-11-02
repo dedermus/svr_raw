@@ -21,35 +21,35 @@ class FromSelexMilk extends Model
      * Точное название таблицы с учетом схемы
      * @var string
      */
-    protected $table								= 'raw.raw_from_selex_milk';
+    protected $table = 'raw.raw_from_selex_milk';
 
 
     /**
      * Первичный ключ таблицы (автоинкремент)
      * @var string
      */
-    protected $primaryKey						    = 'raw_from_selex_milk_id';
+    protected $primaryKey = 'raw_from_selex_milk_id';
 
 
     /**
      * Поле даты создания строки
      * @var string
      */
-    const CREATED_AT                                = 'created_at';
+    const CREATED_AT = 'created_at';
 
 
     /**
      * Поле даты обновления строки
      * @var string
      */
-    const UPDATED_AT                                = 'update_at';
+    const UPDATED_AT = 'update_at';
 
 
     /**
      * Значения полей по умолчанию
      * @var array
      */
-    protected $attributes                           = [];
+    protected $attributes = [];
 
 
     protected array $dates = [
@@ -79,7 +79,7 @@ class FromSelexMilk extends Model
      */
     public function createRaw(Application|Request $request): void
     {
-        $this->rules($request);
+        $this->rulesReturnWithBag($request);
         $data = $request->all();
         self::create($data);
     }
@@ -93,7 +93,7 @@ class FromSelexMilk extends Model
     public function updateRaw(Application|Request $request): void
     {
         // валидация
-        $this->rules($request);
+        $this->rulesReturnWithBag($request);
         // получаем массив полей и значений и формы
         $data = $this->fill($request->all());
         $data = $request->all();
@@ -109,7 +109,7 @@ class FromSelexMilk extends Model
      * Поля, которые можно менять сразу массивом
      * @var array
      */
-    protected $fillable                     = [
+    protected $fillable = [
         'raw_from_selex_milk_id',       // инкремент
         'NANIMAL',                      // животное - НЕ уникальный идентификатор
         'NANIMAL_TIME',                 // животное - уникальный идентификатор (наверное...)
@@ -174,7 +174,7 @@ class FromSelexMilk extends Model
      * Массив системных скрытых полей
      * @var array
      */
-    protected $hidden								= [];
+    protected $hidden = [];
 
 
     /**
@@ -184,7 +184,7 @@ class FromSelexMilk extends Model
      *
      * @return void
      */
-    private function rules( Application|Request $request): void
+    private function rules(Application|Request $request): void
     {
         // получаем поля со значениями
         $data = $request->all();
@@ -469,5 +469,134 @@ class FromSelexMilk extends Model
             ['ANIMALS_JSON' => 'json|nullable'],
             ['ANIMALS_JSON' => trans('svr-core-lang::validation')]
         );
+    }
+
+
+    /**
+     * Валидация входных данных
+     * Проверка не прерывается на первой ошибке.
+     *
+     * @param $request
+     *
+     */
+    private function rulesReturnWithBag(Application|Request $request)
+    {
+        // получаем поля со значениями
+        $data = $request->all();
+
+        // получаем значение первичного ключа
+        $id = (isset($data[$this->primaryKey])) ? $data[$this->primaryKey] : null;
+
+        // Объединяем все правила в один массив
+        $rules = [
+            $this->primaryKey => 'required|exists:.' . $this->getTable() . ',' . $this->primaryKey,
+            'NANIMAL'             => 'integer|nullable',
+            'NANIMAL_TIME'        => 'max:128|nullable',
+            'NINV'                => 'max:15|nullable',
+            'KLICHKA'             => 'max:50|nullable',
+            'POL'                 => 'max:30|nullable',
+            'NPOL'                => 'integer|nullable',
+            'NGOSREGISTER'        => 'max:50|nullable',
+            'NINV1'               => 'max:15|nullable',
+            'NINV3'               => 'max:20|nullable',
+            'ANIMAL_VID'          => 'max:50|nullable',
+            'ANIMAL_VID_COD'      => 'required|integer',
+            'MAST'                => 'max:30|nullable',
+            'NMAST'               => 'integer|nullable',
+            'POR'                 => 'max:30|nullable',
+            'NPOR'                => 'integer|nullable',
+            'DATE_ROGD'           => 'date|nullable',
+            'DATE_POSTUPLN'       => 'date|nullable',
+            'NHOZ_ROGD'           => 'integer|nullable',
+            'NHOZ'                => 'integer|nullable',
+            'NOBL'                => 'integer|nullable',
+            'NRN'                 => 'integer|nullable',
+            'NIDENT'              => 'max:20|nullable',
+            'ROGD_HOZ'            => 'max:50|nullable',
+            'DATE_V'              => 'date|nullable',
+            'PV'                  => 'max:60|nullable',
+            'RASHOD'              => 'max:30|nullable',
+            'GM_V'                => 'integer|nullable',
+            'ISP'                 => 'max:20|nullable',
+            'DATE_CHIP'           => 'date|nullable',
+            'DATE_NINV'           => 'date|nullable',
+            'DATE_NGOSREGISTER'   => 'date|nullable',
+            'NINV_OTCA'           => 'max:15|nullable',
+            'NGOSREGISTER_OTCA'   => 'max:50|nullable',
+            'POR_OTCA'            => 'max:30|nullable',
+            'NPOR_OTCA'           => 'integer|nullable',
+            'DATE_ROGD_OTCA'      => 'date|nullable',
+            'NINV_MATERI'         => 'max:15|nullable',
+            'NGOSREGISTER_MATERI' => 'max:50|nullable',
+            'POR_MATERI'          => 'max:30|nullable',
+            'NPOR_MATERI'         => 'integer|nullable',
+            'DATE_ROGD_MATERI'    => 'date|nullable',
+            'IMPORT_STATUS'       => 'required',
+            'TASK'                => 'integer|nullable',
+            'GUID_SVR'            => 'max:64|nullable',
+            'ANIMALS_JSON'        => 'json|nullable',
+        ];
+
+        // Объединяем все сообщения об ошибках в один массив
+        $messages = [
+             $this->primaryKey         .  '.required'   => trans('svr-core-lang::validation.required'),
+            $this->primaryKey         .  '.exists'      => trans('svr-core-lang::validation.exists'),
+            'NANIMAL.integer'         => trans('svr-core-lang::validation.integer'),
+            'NANIMAL_TIME.max'        => trans('svr-core-lang::validation.max'),
+            'NINV.max'                => trans('svr-core-lang::validation.max'),
+            'KLICHKA.max'             => trans('svr-core-lang::validation.max'),
+            'POL.max'                 => trans('svr-core-lang::validation.max'),
+            'NPOL.integer'            => trans('svr-core-lang::validation.integer'),
+            'NGOSREGISTER.max'        => trans('svr-core-lang::validation.max'),
+            'NINV1.max'               => trans('svr-core-lang::validation.max'),
+            'NINV3.max'               => trans('svr-core-lang::validation.max'),
+            'ANIMAL_VID.max'          => trans('svr-core-lang::validation.max'),
+            'ANIMAL_VID_COD.required' => trans('svr-core-lang::validation.required'),
+            'ANIMAL_VID_COD.integer'  => trans('svr-core-lang::validation.integer'),
+            'MAST.max'                => trans('svr-core-lang::validation.max'),
+            'NMAST.integer'           => trans('svr-core-lang::validation.integer'),
+            'POR.max'                 => trans('svr-core-lang::validation.max'),
+            'NPOR.integer'            => trans('svr-core-lang::validation.integer'),
+            'DATE_ROGD.date'          => trans('svr-core-lang::validation.date'),
+            'DATE_POSTUPLN.date'      => trans('svr-core-lang::validation.date'),
+            'NHOZ_ROGD.integer'       => trans('svr-core-lang::validation.integer'),
+            'NHOZ.integer'            => trans('svr-core-lang::validation.integer'),
+            'NOBL.integer'            => trans('svr-core-lang::validation.integer'),
+            'NRN.integer'             => trans('svr-core-lang::validation.integer'),
+            'NIDENT.max'              => trans('svr-core-lang::validation.max'),
+            'ROGD_HOZ.max'            => trans('svr-core-lang::validation.max'),
+            'DATE_V.date'             => trans('svr-core-lang::validation.date'),
+            'PV.max'                  => trans('svr-core-lang::validation.max'),
+            'RASHOD.max'              => trans('svr-core-lang::validation.max'),
+            'GM_V.integer'            => trans('svr-core-lang::validation.integer'),
+            'ISP.max'                 => trans('svr-core-lang::validation.max'),
+            'DATE_CHIP.date'          => trans('svr-core-lang::validation.date'),
+            'DATE_NINV.date'          => trans('svr-core-lang::validation.date'),
+            'DATE_NGOSREGISTER.date'  => trans('svr-core-lang::validation.date'),
+            'NINV_OTCA.max'           => trans('svr-core-lang::validation.max'),
+            'NGOSREGISTER_OTCA.max'   => trans('svr-core-lang::validation.max'),
+            'POR_OTCA.max'            => trans('svr-core-lang::validation.max'),
+            'NPOR_OTCA.integer'       => trans('svr-core-lang::validation.integer'),
+            'DATE_ROGD_OTCA.date'     => trans('svr-core-lang::validation.date'),
+            'NINV_MATERI.max'         => trans('svr-core-lang::validation.max'),
+            'NGOSREGISTER_MATERI.max' => trans('svr-core-lang::validation.max'),
+            'POR_MATERI.max'          => trans('svr-core-lang::validation.max'),
+            'NPOR_MATERI.integer'     => trans('svr-core-lang::validation.integer'),
+            'DATE_ROGD_MATERI.date'   => trans('svr-core-lang::validation.date'),
+            'IMPORT_STATUS.required'  => trans('svr-core-lang::validation.required'),
+            'TASK.integer'            => trans('svr-core-lang::validation.integer'),
+            'GUID_SVR.max'            => trans('svr-core-lang::validation.max'),
+            'ANIMALS_JSON.json'       => trans('svr-core-lang::validation.json'),
+        ];
+
+        try {
+            // Используем validateWithBag для получения всех ошибок
+            $validated = $request->validateWithBag('default', $rules, $messages);
+        } catch (ValidationException $e) {
+            // Перенаправляем обратно с ошибками
+            return redirect()->back()
+                ->withErrors($e->validator, 'default')
+                ->withInput();
+        }
     }
 }

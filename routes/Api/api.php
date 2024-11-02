@@ -1,6 +1,6 @@
 <?php
 
-//use Svr\Raw\Middleware\ApiValidationErrors;
+use Svr\Raw\Middleware\ApiValidationErrors;
 use Illuminate\Support\Facades\Route;
 use Svr\Raw\Controllers\Api\ApiFromSelexBeefController;
 
@@ -13,7 +13,7 @@ use Svr\Raw\Controllers\Api\ApiFromSelexBeefController;
 
 Route::middleware('api')
     ->prefix('api')
-//    ->middleware(ApiValidationErrors::class)
+    ->middleware(ApiValidationErrors::class)
     ->group(function () {
         Route::get('from-selex-beef/',      [ApiFromSelexBeefController::class, 'index']);      // Для получения списка записей
         Route::post('from-selex-beef/',     [ApiFromSelexBeefController::class, 'store']);      // Для создания новой записи
