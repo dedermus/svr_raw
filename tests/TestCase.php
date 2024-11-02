@@ -10,5 +10,5 @@ use Laravel\BrowserKitTesting\TestCase as BaseTestCase;
 
 class TestCase extends BaseTestCase
 {
-    // тут логика всякая но не тесты
+    //  В будущем здесь будет код )
 }

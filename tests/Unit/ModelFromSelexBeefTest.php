@@ -2,7 +2,7 @@
 
 namespace Svr\Raw\Tests\Unit;
 
-use Svr\Raw\Tests\TestCase;
+use Tests\TestCase;
 use Svr\Raw\Models\FromSelexBeef;
 use Illuminate\Support\Facades\Schema;
 
