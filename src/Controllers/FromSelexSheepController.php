@@ -204,17 +204,17 @@ class FromSelexSheepController extends AdminController
                 ])
             ->default(17)
             ->help(trans($this->trans . 'animal_vid_cod'));
-        $form->xx_input('KLICHKA', __('KLICHKA'))
+        $form->text('KLICHKA', __('KLICHKA'))
             ->help(trans($this->trans . 'klichka'));
-        $form->xx_input('POL', __('POL'))
+        $form->text('POL', __('POL'))
             ->help(trans($this->trans . 'pol'));
         $form->number('NPOL', __('NPOL'))
             ->help(trans($this->trans . 'npol'));
-        $form->xx_input('POR', __('POR'))
+        $form->text('POR', __('POR'))
             ->help(trans($this->trans . 'por'));
         $form->number('NPOR', __('NPOR'))
             ->help(trans($this->trans . 'npor'));
-        $form->xx_input('OSN_OKRAS', __('OSN_OKRAS'))
+        $form->text('OSN_OKRAS', __('OSN_OKRAS'))
             ->help(trans($this->trans . 'osn_okras'));
         $form->date('DATE_ROGD', __('DATE_ROGD'))
             ->help(trans($this->trans . 'date_rogd'));
@@ -228,50 +228,50 @@ class FromSelexSheepController extends AdminController
             ->help(trans($this->trans . 'nobl'));
         $form->number('NRN', __('NRN'))
             ->help(trans($this->trans . 'nrn'));
-        $form->xx_input('NIDENT', __('NIDENT'))
+        $form->text('NIDENT', __('NIDENT'))
             ->help(trans($this->trans . 'nident'));
         $form->number('NSODERGANIE', __('NSODERGANIE'))
             ->help(trans($this->trans . 'nsoderganie'));
-        $form->xx_input('SODERGANIE_IM', __('SODERGANIE_IM'))
+        $form->text('SODERGANIE_IM', __('SODERGANIE_IM'))
             ->help(trans($this->trans . 'soderganie_im'));
         $form->date('DATE_V', __('DATE_V'))
             ->help(trans($this->trans . 'date_v'));
-        $form->xx_input('PV', __('PV'))
+        $form->text('PV', __('PV'))
             ->help(trans($this->trans . 'pv'));
-        $form->xx_input('RASHOD', __('RASHOD'))
+        $form->text('RASHOD', __('RASHOD'))
             ->help(trans($this->trans . 'rashod'));
         $form->number('GM_V', __('GM_V'))
             ->help(trans($this->trans . 'gm_v'));
-        $form->xx_input('ISP', __('ISP'))
+        $form->text('ISP', __('ISP'))
             ->help(trans($this->trans . 'isp'));
-        $form->xx_input('DATE_CHIP', __('DATE_CHIP'))
+        $form->text('DATE_CHIP', __('DATE_CHIP'))
             ->help(trans($this->trans . 'date_chip'));
-        $form->xx_input('DATE_NINVRIGHT', __('DATE_NINVRIGHT'))
+        $form->text('DATE_NINVRIGHT', __('DATE_NINVRIGHT'))
             ->help(trans($this->trans . 'date_ninvright'));
-        $form->xx_input('DATE_NINVLEFT', __('DATE_NINVLEFT'))
+        $form->text('DATE_NINVLEFT', __('DATE_NINVLEFT'))
             ->help(trans($this->trans . 'date_ninvleft'));
-        $form->xx_input('DATE_NGOSREGISTER', __('DATE_NGOSREGISTER'))
+        $form->text('DATE_NGOSREGISTER', __('DATE_NGOSREGISTER'))
             ->help(trans($this->trans . 'date_ngosregister'));
-        $form->xx_input('NINVRIGHT_OTCA', __('NINVRIGHT_OTCA'))
+        $form->text('NINVRIGHT_OTCA', __('NINVRIGHT_OTCA'))
             ->help(trans($this->trans . 'ninvright_otca'));
-        $form->xx_input('NINVLEFT_OTCA', __('NINVLEFT_OTCA'))
+        $form->text('NINVLEFT_OTCA', __('NINVLEFT_OTCA'))
             ->help(trans($this->trans . 'ninvleft_otca'));
-        $form->xx_input('NGOSREGISTER_OTCA', __('NGOSREGISTER_OTCA'))
+        $form->text('NGOSREGISTER_OTCA', __('NGOSREGISTER_OTCA'))
             ->help(trans($this->trans . 'ngosregister_otca'));
-        $form->xx_input('NINVRIGHT_MATERI', __('NINVRIGHT_MATERI'))
+        $form->text('NINVRIGHT_MATERI', __('NINVRIGHT_MATERI'))
             ->help(trans($this->trans . 'ninvright_materi'));
-        $form->xx_input('NINVLEFT_MATERI', __('NINVLEFT_MATERI'))
+        $form->text('NINVLEFT_MATERI', __('NINVLEFT_MATERI'))
             ->help(trans($this->trans . 'ninvleft_materi'));
-        $form->xx_input('NGOSREGISTER_MATERI', __('NGOSREGISTER_MATERI'))
+        $form->text('NGOSREGISTER_MATERI', __('NGOSREGISTER_MATERI'))
             ->help(trans($this->trans . 'ngosregister_materi'));
-        $form->xx_input('IMPORT_STATUS', __('IMPORT_STATUS'))
+        $form->text('IMPORT_STATUS', __('IMPORT_STATUS'))
             ->options(ImportStatusEnum::get_option_list())
             ->help(trans($this->trans . 'import_status'))
             ->required()
             ->default('new');
         $form->number('TASK', __('TASK'))
             ->help(trans($this->trans . 'task'));
-        $form->xx_input('GUID_SVR', __('GUID_SVR'))
+        $form->text('GUID_SVR', __('GUID_SVR'))
             ->help(trans($this->trans . 'guid_svr'));
         $form->textarea('ANIMALS_JSON', __('ANIMALS_JSON'))
             ->help(trans($this->trans . 'animals_json'));
