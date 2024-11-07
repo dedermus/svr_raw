@@ -21,12 +21,8 @@ class RawServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__ . '/../routes/Api/api.php');
         $this->register();
 
-//        $this->app->setLocale('ru');
-//        $this->app->setFallbackLocale('ru');
-//        $this->app->setLocale('ru');
 
-
-//        Регистрируем фабрики моделей
+        // Регистрируем фабрики моделей
         Factory::guessFactoryNamesUsing(function (string $modelName) {
             return 'Svr\\Raw\\Factories\\' . class_basename($modelName) . 'Factory';
         });
@@ -40,11 +36,11 @@ class RawServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             // Обработка команды из терминала
         }
-
+        // Регистрируем глобально миддлвар
         $this->registerMiddleware(ApiValidationErrors::class);
 
         // Регистрируем глобального  обработчик исключений
-//        $this->withExceptions(new ExceptionHandler());
+        // $this->withExceptions(new ExceptionHandler());
         RawManager::boot();
     }
 
@@ -56,7 +52,8 @@ class RawServiceProvider extends ServiceProvider
     protected function registerMiddleware($middleware)
     {
         $kernel = $this->app[Kernel::class];
-        $kernel->pushMiddleware($middleware);
+        // $kernel->pushMiddleware($middleware);  // глобально
+        $kernel->appendMiddlewareToGroup('api', $middleware); // доббавить мидлвар в группу api
     }
 
     /**
