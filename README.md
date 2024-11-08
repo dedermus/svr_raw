@@ -1,4 +1,4 @@
-SVR RAW для Open-Admin ver:1.0.52
+SVR RAW для Open-Admin ver:1.0.53
 =========================
 
 ## Установка
@@ -69,8 +69,14 @@ git tag
 ### Tests
 [docs](https://docs.phpunit.de/en/10.5/index.html)
 ```
-php artisan test --configuration=./vendor/svr/raw/phpunit.xml --testsuite=SvrRawUnit
+php artisan test --configuration=./vendor/svr/raw/phpunit.xml --testsuite=all
 ```
+
+```
+php artisan svr/raw:tests all
+```
+Через `--help` доступен help
+
 Где:
 `--testsuite` это пресеты `testsuite name` в файле `phpunit.xml`. Например SvrRawUnit
 

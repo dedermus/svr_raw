@@ -130,13 +130,13 @@ class FromSelexMilkController extends AdminController
 //         TODO: Реализовать
 //         Настройки фильтров
 
-////         Отключение кнопки создания
-//        $grid->disableCreateButton();
-////         Отключение "удаление" и редактирование у строк
-//        $grid->actions(function (Grid\Displayers\Actions\Actions $actions) {
-//            $actions->disableDelete();
-//            $actions->disableEdit();
-//        });
+//         Отключение кнопки создания
+        $grid->disableCreateButton();
+//         Отключение "удаление" и редактирование у строк
+        $grid->actions(function (Grid\Displayers\Actions\Actions $actions) {
+            $actions->disableDelete();
+            $actions->disableEdit();
+        });
         return $grid;
     }
 
@@ -165,11 +165,11 @@ class FromSelexMilkController extends AdminController
             };
         }
         // Убрать кнопку "Удалить" и "редактировать"
-//        $show->panel()
-//            ->tools(function ($tools) {
-//                $tools->disableDelete();
-//                $tools->disableEdit();
-//            });
+        $show->panel()
+            ->tools(function ($tools) {
+                $tools->disableDelete();
+                $tools->disableEdit();
+            });
         return $show;
     }
 

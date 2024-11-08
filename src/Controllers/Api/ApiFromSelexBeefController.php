@@ -7,6 +7,8 @@ use Illuminate\Routing\Controller;
 
 use Svr\Raw\Models\FromSelexBeef;
 use Illuminate\Http\Request;
+use Svr\Raw\Resources\GetAnimalsCollection;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class ApiFromSelexBeefController extends Controller
 {
@@ -52,5 +54,18 @@ class ApiFromSelexBeefController extends Controller
         $records = FromSelexBeef::paginate($perPage);
 
         return response()->json($records);
+    }
+
+
+    /**
+     * Получение списка записей по GUID_SVR.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Resources\Json\ResourceCollection
+     */
+    public function get_animals(Request $request): ResourceCollection
+    {
+        $records = FromSelexBeef::whereIn('GUID_SVR', $request->json()->all()['list_animals_guid_svr'])->get();
+        return new GetAnimalsCollection($records);
     }
 }
