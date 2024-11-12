@@ -34,7 +34,7 @@
         }
     },
     "require": {
-        "svr/core": "^1.0",
+        "svr/core": "dev-main",
         "php": "^8.2",
         "dedermus/open-admin-core": "^v2.0",
         "laravel/browser-kit-testing": "^7.2",
