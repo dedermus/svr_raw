@@ -184,27 +184,25 @@ class FromSelexMilkController extends AdminController
         $model = $this->model_obj;
         $form = new Form($this->model_obj);
         $form->display($form->model()->getKeyName(), trans($this->trans . $form->model()->getKeyName()));
-        $form->xx_input('NINV2', __('NINV2'))
-            ->help(trans($this->trans . 'ninv2'));
-        $form->xx_input('NANIMAL', __('NANIMAL'))
+        $form->number('NANIMAL', __('NANIMAL'))
             ->help(trans($this->trans . 'nanimal'));
-        $form->xx_input('NANIMAL_TIME', __('NANIMAL_TIME'))
+        $form->text('NANIMAL_TIME', __('NANIMAL_TIME'))
             ->help(trans($this->trans . 'nanimal_time'));
-        $form->xx_input('NINV', __('NINV'))
+        $form->text('NINV', __('NINV'))
             ->help(trans($this->trans . 'ninv'));
-        $form->xx_input('KLICHKA', __('KLICHKA'))
+        $form->text('KLICHKA', __('KLICHKA'))
             ->help(trans($this->trans . 'klichka'));
-        $form->xx_input('POL', __('POL'))
+        $form->text('POL', __('POL'))
             ->help(trans($this->trans . 'pol'));
         $form->number('NPOL', __('NPOL'))
             ->help(trans($this->trans . 'npol'));
-        $form->xx_input('NGOSREGISTER', __('NGOSREGISTER'))
+        $form->text('NGOSREGISTER', __('NGOSREGISTER'))
             ->help(trans($this->trans . 'ngosregister'));
-        $form->xx_input('NINV1', __('NINV1'))
+        $form->text('NINV1', __('NINV1'))
             ->help(trans($this->trans . 'ninv1'));
-        $form->xx_input('NINV3', __('NINV3'))
+        $form->text('NINV3', __('NINV3'))
             ->help(trans($this->trans . 'ninv3'));
-        $form->xx_input('ANIMAL_VID', __('ANIMAL_VID'))
+        $form->text('ANIMAL_VID', __('ANIMAL_VID'))
             ->help(trans($this->trans . 'animal_vid'));
         $form->select('ANIMAL_VID_COD', __('ANIMAL_VID_COD'))
             ->options([
@@ -213,11 +211,11 @@ class FromSelexMilkController extends AdminController
             ])
             ->default(17)
             ->help(trans($this->trans . 'animal_vid_cod'));
-        $form->xx_input('MAST', __('MAST'))
+        $form->text('MAST', __('MAST'))
             ->help(trans($this->trans . 'mast'));
         $form->number('NMAST', __('NMAST'))
             ->help(trans($this->trans . 'nmast'));
-        $form->xx_input('POR', __('POR'))
+        $form->text('POR', __('POR'))
             ->help(trans($this->trans . 'por'));
         $form->number('NPOR', __('NPOR'))
             ->help(trans($this->trans . 'npor'));
@@ -233,19 +231,19 @@ class FromSelexMilkController extends AdminController
             ->help(trans($this->trans . 'nobl'));
         $form->number('NRN', __('NRN'))
             ->help(trans($this->trans . 'nrn'));
-        $form->xx_input('NIDENT', __('NIDENT'))
+        $form->text('NIDENT', __('NIDENT'))
             ->help(trans($this->trans . 'nident'));
-        $form->xx_input('ROGD_HOZ', __('ROGD_HOZ'))
+        $form->text('ROGD_HOZ', __('ROGD_HOZ'))
             ->help(trans($this->trans . 'rogd_hoz'));
         $form->date('DATE_V', __('DATE_V'))
             ->help(trans($this->trans . 'date_v'));
-        $form->xx_input('PV', __('PV'))
+        $form->text('PV', __('PV'))
             ->help(trans($this->trans . 'pv'));
-        $form->xx_input('RASHOD', __('RASHOD'))
+        $form->text('RASHOD', __('RASHOD'))
             ->help(trans($this->trans . 'rashod'));
         $form->number('GM_V', __('GM_V'))
             ->help(trans($this->trans . 'gm_v'));
-        $form->xx_input('ISP', __('ISP'))
+        $form->text('ISP', __('ISP'))
             ->help(trans($this->trans . 'isp'));
         $form->date('DATE_CHIP', __('DATE_CHIP'))
             ->help(trans($this->trans . 'date_chip'));
@@ -253,21 +251,21 @@ class FromSelexMilkController extends AdminController
             ->help(trans($this->trans . 'date_ninv'));
         $form->date('DATE_NGOSREGISTER', __('DATE_NGOSREGISTER'))
             ->help(trans($this->trans . 'date_ngosregister'));
-        $form->xx_input('NINV_OTCA', __('NINV_OTCA'))
+        $form->text('NINV_OTCA', __('NINV_OTCA'))
             ->help(trans($this->trans . 'ninv_otca'));
-        $form->xx_input('NGOSREGISTER_OTCA', __('NGOSREGISTER_OTCA'))
+        $form->text('NGOSREGISTER_OTCA', __('NGOSREGISTER_OTCA'))
             ->help(trans($this->trans . 'ngosregister_otca'));
-        $form->xx_input('POR_OTCA', __('POR_OTCA'))
+        $form->text('POR_OTCA', __('POR_OTCA'))
             ->help(trans($this->trans . 'por_otca'));
         $form->number('NPOR_OTCA', __('NPOR_OTCA'))
             ->help(trans($this->trans . 'npor_otca'));
         $form->date('DATE_ROGD_OTCA', __('DATE_ROGD_OTCA'))
             ->help(trans($this->trans . 'date_rogd_otca'));
-        $form->xx_input('NINV_MATERI', __('NINV_MATERI'))
+        $form->text('NINV_MATERI', __('NINV_MATERI'))
             ->help(trans($this->trans . 'ninv_materi'));
-        $form->xx_input('NGOSREGISTER_MATERI', __('NGOSREGISTER_MATERI'))
+        $form->text('NGOSREGISTER_MATERI', __('NGOSREGISTER_MATERI'))
             ->help(trans($this->trans . 'ngosregister_materi'));
-        $form->xx_input('POR_MATERI', __('POR_MATERI'))
+        $form->text('POR_MATERI', __('POR_MATERI'))
             ->help(trans($this->trans . 'por_materi'));
         $form->number('NPOR_MATERI', __('NPOR_MATERI'))
             ->help(trans($this->trans . 'npor_materi'));
@@ -280,7 +278,7 @@ class FromSelexMilkController extends AdminController
             ->default('new');
         $form->number('TASK', __('TASK'))
             ->help(trans($this->trans . 'task'));
-        $form->xx_input('GUID_SVR', __('GUID_SVR'))
+        $form->text('GUID_SVR', __('GUID_SVR'))
             ->help(trans($this->trans . 'guid_svr'));
         $form->textarea('ANIMALS_JSON', __('ANIMALS_JSON'))
             ->help(trans($this->trans . 'animals_json'));

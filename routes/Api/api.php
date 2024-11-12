@@ -12,10 +12,11 @@ use Svr\Raw\Controllers\Api\ApiFromSelexBeefController;
 */
 
 Route::middleware('api')
-    ->prefix('api')
+    ->prefix('v1')
     ->middleware(ApiValidationErrors::class)
     ->group(function () {
-        Route::get('from-selex-beef/',      [ApiFromSelexBeefController::class, 'index']);      // Для получения списка записей
-        Route::post('from-selex-beef/',     [ApiFromSelexBeefController::class, 'store']);      // Для создания новой записи
-        Route::put('from-selex-beef/{id}',  [ApiFromSelexBeefController::class, 'update']);     // Для обновления существующей записи
+        Route::post('selex/get_animals/',       [ApiFromSelexBeefController::class, 'get_animals']);      // Получение списка записей по GUID_SVR.
+
+//        Route::post('selex/',       [ApiFromSelexBeefController::class, 'store']);      // Для создания новой записи
+//        Route::post('selex/',       [ApiFromSelexBeefController::class, 'update']);     // Для обновления существующей записи
     });
