@@ -50,12 +50,10 @@
     "scripts": {
         "post-install-cmd": [
             "php artisan clear-compiled",
-            "php artisan package:testsuite svr/raw",
             "php artisan optimize"
         ],
         "post-update-cmd": [
             "php artisan clear-compiled",
-            "php artisan package:testsuite svr/raw",
             "php artisan optimize"
         ]
     }

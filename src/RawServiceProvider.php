@@ -44,11 +44,7 @@ class RawServiceProvider extends ServiceProvider
             // Обработка команды из терминала
 
         }
-        // Регистрируем глобально миддлвар
-        $this->registerMiddleware(ApiValidationErrors::class);
 
-        // Регистрируем глобального  обработчик исключений
-        $this->withExceptions(new ExceptionHandler());
         RawManager::boot();
     }
 
@@ -64,42 +60,5 @@ class RawServiceProvider extends ServiceProvider
 
     }
 
-
-
-    /**
-     * Регистрация Middleware
-     *
-     * @param string $middleware
-     */
-    protected function registerMiddleware($middleware)
-    {
-        $kernel = $this->app[Kernel::class];
-        // $kernel->pushMiddleware($middleware);  // глобально
-        $kernel->appendMiddlewareToGroup('api', $middleware); // доббавить мидлвар в группу api
-    }
-
-    /**
-     * Регистрация обработчика исключений приложения.
-     *
-     * @param callable|null $using
-     * @return $this
-     *
-     */
-    protected function withExceptions(?callable $using = null)
-    {
-        $this->app->singleton(
-            \Illuminate\Contracts\Debug\ExceptionHandler::class,
-            \Illuminate\Foundation\Exceptions\Handler::class
-        );
-
-        $using ??= fn() => true;
-
-        $this->app->afterResolving(
-            \Illuminate\Foundation\Exceptions\Handler::class,
-            fn($handler) => $using(new \Illuminate\Foundation\Configuration\Exceptions($handler)),
-        );
-
-        return $this;
-    }
 
 }
