@@ -4,10 +4,10 @@ namespace Svr\Raw\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Svr\Core\Enums\ImportStatusEnum;
+use Svr\Core\Traits\GetValidationRules;
 
 /**
  * Модель: сырые данные из Селекс для овец
@@ -17,34 +17,35 @@ use Svr\Core\Enums\ImportStatusEnum;
 class FromSelexSheep extends Model
 {
     use HasFactory;
+    use GetValidationRules;
 
 
     /**
      * Точное название таблицы с учетом схемы
      * @var string
      */
-    protected $table                                = 'raw.raw_from_selex_sheep';
+    protected $table = 'raw.raw_from_selex_sheep';
 
 
     /**
      * Первичный ключ таблицы (автоинкремент)
      * @var string
      */
-    protected $primaryKey                           = 'raw_from_selex_sheep_id';
+    protected $primaryKey = 'raw_from_selex_sheep_id';
 
 
     /**
      * Поле даты создания строки
      * @var string
      */
-    const CREATED_AT                                = 'created_at';
+    const CREATED_AT = 'created_at';
 
 
     /**
      * Поле даты обновления строки
      * @var string
      */
-    const UPDATED_AT                                = 'update_at';
+    const UPDATED_AT = 'update_at';
 
 
     /**
@@ -52,7 +53,6 @@ class FromSelexSheep extends Model
      * @var array
      */
     protected $attributes = [];
-
 
 
     protected array $dates = [
@@ -82,7 +82,7 @@ class FromSelexSheep extends Model
      */
     public function createRaw(Request $request): void
     {
-        $this->rulesReturnWithBag($request);
+        $this->validateRequest($request);
         $data = $request->all();
         self::create($data);
     }
@@ -96,7 +96,7 @@ class FromSelexSheep extends Model
     public function updateRaw(Request $request): void
     {
         // валидация
-        $this->rulesReturnWithBag($request);
+        $this->validateRequest($request);
         // получаем массив полей и значений и формы
         $data = $this->fill($request->all());
         $data = $request->all();
@@ -175,37 +175,7 @@ class FromSelexSheep extends Model
      * Массив системных скрытых полей
      * @var array
      */
-    protected $hidden                           = [];
-
-
-    /**
-     * Валидация входных данных
-     * Проверка не прерывается на первой ошибке.
-     *
-     * @param Request $request
-     */
-    public function rulesReturnWithBag(Request $request): void
-{
-    // получаем поля со значениями
-    $data = $request->all();
-
-    // получаем значение первичного ключа
-    $id = (isset($data[$this->primaryKey])) ? $data[$this->primaryKey] : null;
-
-    // Объединяем все правила в один массив
-    $rules = [
-
-    ];
-
-    // Объединяем все сообщения об ошибках в один массив
-    $messages = [
-
-    ];
-
-        $validated = $request->validateWithBag('default', $rules, $messages);
-    }
-
-
+    protected $hidden = [];
 
     /**
      * Получить правила валидации
@@ -221,51 +191,51 @@ class FromSelexSheep extends Model
                 $request->isMethod('put') ? 'required' : '',
                 Rule::exists('.' . $this->getTable(), $this->primaryKey),
             ],
-        $this->primaryKey => 'required|exists:.' . $this->getTable() . ',' . $this->primaryKey,
-        'NANIMAL'             => 'integer|nullable',
-        'NANIMAL_TIME'        => 'max:128|nullable',
-        'NINVLEFT'            => 'max:20|nullable',
-        'NINVRIGHT'           => 'max:20|nullable',
-        'NGOSREGISTER'        => 'max:50|nullable',
-        'NINV3'               => 'max:20|nullable',
-        'TATY'                => 'max:12|nullable',
-        'ANIMAL_VID'          => 'max:50|nullable',
-        'ANIMAL_VID_COD'      => 'required|integer',
-        'KLICHKA'             => 'max:50|nullable',
-        'POL'                 => 'max:30|nullable',
-        'NPOL'                => 'integer|nullable',
-        'POR'                 => 'max:30|nullable',
-        'NPOR'                => 'integer|nullable',
-        'OSN_OKRAS'           => 'max:30|nullable',
-        'DATE_ROGD'           => 'date|nullable',
-        'DATE_POSTUPLN'       => 'date|nullable',
-        'NHOZ_ROGD'           => 'integer|nullable',
-        'NHOZ'                => 'integer|nullable',
-        'NOBL'                => 'integer|nullable',
-        'NRN'                 => 'integer|nullable',
-        'NIDENT'              => 'max:30|nullable',
-        'NSODERGANIE'         => 'integer|nullable',
-        'SODERGANIE_IM'       => 'max:40|nullable',
-        'DATE_V'              => 'date|nullable',
-        'PV'                  => 'max:60|nullable',
-        'RASHOD'              => 'max:30|nullable',
-        'GM_V'                => 'integer|nullable',
-        'ISP'                 => 'max:20|nullable',
-        'DATE_CHIP'           => 'date|nullable',
-        'DATE_NINVRIGHT'      => 'date|nullable',
-        'DATE_NINVLEFT'       => 'date|nullable',
-        'DATE_NGOSREGISTER'   => 'date|nullable',
-        'NINVRIGHT_OTCA'      => 'max:15|nullable',
-        'NINVLEFT_OTCA'       => 'max:15|nullable',
-        'NGOSREGISTER_OTCA'   => 'max:50|nullable',
-        'NINVRIGHT_MATERI'    => 'max:15|nullable',
-        'NINVLEFT_MATERI'     => 'max:15|nullable',
-        'NGOSREGISTER_MATERI' => 'max:50|nullable',
-        'IMPORT_STATUS'       => ['required',
-                                 Rule::enum(ImportStatusEnum::class)],
-        'TASK'                => 'integer|nullable',
-        'GUID_SVR'            => 'max:64|nullable',
-        'ANIMALS_JSON'        => 'json|nullable',
+            $this->primaryKey => 'required|exists:.' . $this->getTable() . ',' . $this->primaryKey,
+            'NANIMAL' => 'integer|nullable',
+            'NANIMAL_TIME' => 'max:128|nullable',
+            'NINVLEFT' => 'max:20|nullable',
+            'NINVRIGHT' => 'max:20|nullable',
+            'NGOSREGISTER' => 'max:50|nullable',
+            'NINV3' => 'max:20|nullable',
+            'TATY' => 'max:12|nullable',
+            'ANIMAL_VID' => 'max:50|nullable',
+            'ANIMAL_VID_COD' => 'required|integer',
+            'KLICHKA' => 'max:50|nullable',
+            'POL' => 'max:30|nullable',
+            'NPOL' => 'integer|nullable',
+            'POR' => 'max:30|nullable',
+            'NPOR' => 'integer|nullable',
+            'OSN_OKRAS' => 'max:30|nullable',
+            'DATE_ROGD' => 'date|nullable',
+            'DATE_POSTUPLN' => 'date|nullable',
+            'NHOZ_ROGD' => 'integer|nullable',
+            'NHOZ' => 'integer|nullable',
+            'NOBL' => 'integer|nullable',
+            'NRN' => 'integer|nullable',
+            'NIDENT' => 'max:30|nullable',
+            'NSODERGANIE' => 'integer|nullable',
+            'SODERGANIE_IM' => 'max:40|nullable',
+            'DATE_V' => 'date|nullable',
+            'PV' => 'max:60|nullable',
+            'RASHOD' => 'max:30|nullable',
+            'GM_V' => 'integer|nullable',
+            'ISP' => 'max:20|nullable',
+            'DATE_CHIP' => 'date|nullable',
+            'DATE_NINVRIGHT' => 'date|nullable',
+            'DATE_NINVLEFT' => 'date|nullable',
+            'DATE_NGOSREGISTER' => 'date|nullable',
+            'NINVRIGHT_OTCA' => 'max:15|nullable',
+            'NINVLEFT_OTCA' => 'max:15|nullable',
+            'NGOSREGISTER_OTCA' => 'max:50|nullable',
+            'NINVRIGHT_MATERI' => 'max:15|nullable',
+            'NINVLEFT_MATERI' => 'max:15|nullable',
+            'NGOSREGISTER_MATERI' => 'max:50|nullable',
+            'IMPORT_STATUS' => ['required',
+                Rule::enum(ImportStatusEnum::class)],
+            'TASK' => 'integer|nullable',
+            'GUID_SVR' => 'max:64|nullable',
+            'ANIMALS_JSON' => 'json|nullable',
         ];
     }
 
@@ -276,52 +246,52 @@ class FromSelexSheep extends Model
     private function getValidationMessages(): array
     {
         return [
-        // Объединяем все сообщения об ошибках в один массив
-        $this->primaryKey . '.required' => trans('svr-core-lang::validation.required'),
-        $this->primaryKey . '.exists' => trans('svr-core-lang::validation.exists'),
-        'NANIMAL.integer'       => trans('svr-core-lang::validation.integer'),
-        'NANIMAL_TIME'          => trans('svr-core-lang::validation'),
-        'NINVLEFT'              => trans('svr-core-lang::validation'),
-        'NINVRIGHT'             => trans('svr-core-lang::validation'),
-        'NGOSREGISTER'          => trans('svr-core-lang::validation'),
-        'NINV3'                 => trans('svr-core-lang::validation'),
-        'TATY'                  => trans('svr-core-lang::validation'),
-        'ANIMAL_VID'            => trans('svr-core-lang::validation'),
-        'ANIMAL_VID_COD'        => trans('svr-core-lang::validation'),
-        'KLICHKA'               => trans('svr-core-lang::validation'),
-        'POL'                   => trans('svr-core-lang::validation'),
-        'NPOL'                  => trans('svr-core-lang::validation'),
-        'POR'                   => trans('svr-core-lang::validation'),
-        'NPOR'                  => trans('svr-core-lang::validation'),
-        'OSN_OKRAS'             => trans('svr-core-lang::validation'),
-        'DATE_ROGD'             => trans('svr-core-lang::validation'),
-        'DATE_POSTUPLN'         => trans('svr-core-lang::validation'),
-        'NHOZ_ROGD'             => trans('svr-core-lang::validation'),
-        'NHOZ'                  => trans('svr-core-lang::validation'),
-        'NOBL'                  => trans('svr-core-lang::validation'),
-        'NRN'                   => trans('svr-core-lang::validation'),
-        'NIDENT'                => trans('svr-core-lang::validation'),
-        'NSODERGANIE'           => trans('svr-core-lang::validation'),
-        'SODERGANIE_IM'         => trans('svr-core-lang::validation'),
-        'DATE_V'                => trans('svr-core-lang::validation'),
-        'PV'                    => trans('svr-core-lang::validation'),
-        'RASHOD'                => trans('svr-core-lang::validation'),
-        'GM_V'                  => trans('svr-core-lang::validation'),
-        'ISP'                   => trans('svr-core-lang::validation'),
-        'DATE_CHIP'             => trans('svr-core-lang::validation'),
-        'DATE_NINVRIGHT'        => trans('svr-core-lang::validation'),
-        'DATE_NINVLEFT'         => trans('svr-core-lang::validation'),
-        'DATE_NGOSREGISTER'     => trans('svr-core-lang::validation'),
-        'NINVRIGHT_OTCA'        => trans('svr-core-lang::validation'),
-        'NINVLEFT_OTCA'         => trans('svr-core-lang::validation'),
-        'NGOSREGISTER_OTCA'     => trans('svr-core-lang::validation'),
-        'NINVRIGHT_MATERI'      => trans('svr-core-lang::validation'),
-        'NINVLEFT_MATERI'       => trans('svr-core-lang::validation'),
-        'NGOSREGISTER_MATERI'   => trans('svr-core-lang::validation'),
-        'IMPORT_STATUS'         => trans('svr-core-lang::validation'),
-        'TASK'                  => trans('svr-core-lang::validation'),
-        'GUID_SVR'              => trans('svr-core-lang::validation'),
-        'ANIMALS_JSON'          => trans('svr-core-lang::validation'),
+            // Объединяем все сообщения об ошибках в один массив
+            $this->primaryKey . '.required' => trans('svr-core-lang::validation.required'),
+            $this->primaryKey . '.exists' => trans('svr-core-lang::validation.exists'),
+            'NANIMAL.integer' => trans('svr-core-lang::validation.integer'),
+            'NANIMAL_TIME' => trans('svr-core-lang::validation'),
+            'NINVLEFT' => trans('svr-core-lang::validation'),
+            'NINVRIGHT' => trans('svr-core-lang::validation'),
+            'NGOSREGISTER' => trans('svr-core-lang::validation'),
+            'NINV3' => trans('svr-core-lang::validation'),
+            'TATY' => trans('svr-core-lang::validation'),
+            'ANIMAL_VID' => trans('svr-core-lang::validation'),
+            'ANIMAL_VID_COD' => trans('svr-core-lang::validation'),
+            'KLICHKA' => trans('svr-core-lang::validation'),
+            'POL' => trans('svr-core-lang::validation'),
+            'NPOL' => trans('svr-core-lang::validation'),
+            'POR' => trans('svr-core-lang::validation'),
+            'NPOR' => trans('svr-core-lang::validation'),
+            'OSN_OKRAS' => trans('svr-core-lang::validation'),
+            'DATE_ROGD' => trans('svr-core-lang::validation'),
+            'DATE_POSTUPLN' => trans('svr-core-lang::validation'),
+            'NHOZ_ROGD' => trans('svr-core-lang::validation'),
+            'NHOZ' => trans('svr-core-lang::validation'),
+            'NOBL' => trans('svr-core-lang::validation'),
+            'NRN' => trans('svr-core-lang::validation'),
+            'NIDENT' => trans('svr-core-lang::validation'),
+            'NSODERGANIE' => trans('svr-core-lang::validation'),
+            'SODERGANIE_IM' => trans('svr-core-lang::validation'),
+            'DATE_V' => trans('svr-core-lang::validation'),
+            'PV' => trans('svr-core-lang::validation'),
+            'RASHOD' => trans('svr-core-lang::validation'),
+            'GM_V' => trans('svr-core-lang::validation'),
+            'ISP' => trans('svr-core-lang::validation'),
+            'DATE_CHIP' => trans('svr-core-lang::validation'),
+            'DATE_NINVRIGHT' => trans('svr-core-lang::validation'),
+            'DATE_NINVLEFT' => trans('svr-core-lang::validation'),
+            'DATE_NGOSREGISTER' => trans('svr-core-lang::validation'),
+            'NINVRIGHT_OTCA' => trans('svr-core-lang::validation'),
+            'NINVLEFT_OTCA' => trans('svr-core-lang::validation'),
+            'NGOSREGISTER_OTCA' => trans('svr-core-lang::validation'),
+            'NINVRIGHT_MATERI' => trans('svr-core-lang::validation'),
+            'NINVLEFT_MATERI' => trans('svr-core-lang::validation'),
+            'NGOSREGISTER_MATERI' => trans('svr-core-lang::validation'),
+            'IMPORT_STATUS' => trans('svr-core-lang::validation'),
+            'TASK' => trans('svr-core-lang::validation'),
+            'GUID_SVR' => trans('svr-core-lang::validation'),
+            'ANIMALS_JSON' => trans('svr-core-lang::validation'),
         ];
     }
 }
