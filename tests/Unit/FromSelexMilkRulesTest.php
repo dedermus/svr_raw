@@ -40,7 +40,7 @@ class FromSelexMilkRulesTest extends TestCase
         $dmodel = new FromSelexMilk();
         try {
             $result = null;
-            $dmodel->rulesReturnWithBag($request);
+            $dmodel->validateRequest($request);
         } catch (ValidationException $e) {
             $result = $e->errors();
         }
