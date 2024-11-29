@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Svr\Core\Enums\ImportStatusEnum;
 use Svr\Core\Traits\GetValidationRules;
+use Svr\Core\Traits\GetTableName;
 
 /**
  * Модель: сырые данные из Селекс для молочных коров
@@ -16,6 +17,7 @@ use Svr\Core\Traits\GetValidationRules;
  */
 class FromSelexMilk extends Model
 {
+    use GetTableName;
     use HasFactory;
     use GetValidationRules;
 

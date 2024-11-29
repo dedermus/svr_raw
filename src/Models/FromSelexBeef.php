@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Svr\Core\Enums\ImportStatusEnum;
+use Svr\Core\Traits\GetTableName;
 use Svr\Core\Traits\GetValidationRules;
 
 /**
@@ -16,6 +17,7 @@ use Svr\Core\Traits\GetValidationRules;
  */
 class FromSelexBeef extends Model
 {
+    use GetTableName;
     use HasFactory;
     use GetValidationRules;
 
