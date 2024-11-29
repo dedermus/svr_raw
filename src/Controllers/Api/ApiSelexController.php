@@ -9,6 +9,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Svr\Core\Enums\SystemStatusDeleteEnum;
 use Svr\Core\Enums\SystemStatusEnum;
 use Svr\Core\Models\SystemRoles;
@@ -27,9 +28,9 @@ class ApiSelexController extends Controller
     public function selexLogin(Request $request): JsonResponse
     {
 
-        // валидация запроса
+        // НАЧАЛО валидация данных запроса
         $model = new SystemUsers();
-        $user = null; // переменная для пользователя
+        $current_user = collect(); // переменная для пользователя
         // - готовим список необходимых полей для валидации
         $filterKeys = ['user_email', 'user_password', 'user_base_index'];
         // - собираем набор правил и сообщений
@@ -37,7 +38,7 @@ class ApiSelexController extends Controller
         $messages = $model->getFilterValidationMessages($filterKeys);
         // - переопределяем ключи и правила
         $rules['base_index'] = $rules['user_base_index'];
-        $rules['user_base_index'] = "required|" . $rules['user_base_index'];
+        $rules['user_base_index'] = "required|".$rules['user_base_index'];
         $messages['base_index'] = $messages['user_base_index'];
         // ... TODO - подумать об оптимизации данного костыля
         // - удаляем ненужные ключи
@@ -45,10 +46,10 @@ class ApiSelexController extends Controller
         unset($messages['user_base_index']);
         // - проверяем запрос на валидацию
         $request->validate($rules, $messages);
-
+        // КОНЕЦ валидации данных запроса
 
         // Проверить существование пользователя, который активный и не удален
-        /** @var SystemUsers $user */
+        /** @var SystemUsers $users */
         $users = SystemUsers::where([
             ['user_email', '=', $request['user_email']],
             ['user_status', '=', SystemStatusEnum::ENABLED->value],
@@ -61,33 +62,45 @@ class ApiSelexController extends Controller
             // переберем пользователей
             foreach ($users as $item) {
                 // если email и password совпали
-                if ($item && Hash::check($request['user_password'], $item->user_password)) {
-                    $user = $item;
+                if ($item
+                    && Hash::check($request['user_password'],
+                        $item->user_password)
+                ) {
+                    $current_user = $item;
                     break;  // выйдем из перебора
                 }
             }
         }
+
         // Если пользователь не найден
-        if (is_null($user)) { //TODO переписать на нормальный структурированный вид после того как сделаем нормальный конструктор вывода
+        if (is_null($current_user)) { // TODO переписать на нормальный структурированный вид после того как сделаем нормальный конструктор вывода
             // вызваем ошибку авторизации (неправильный логин или пароль) Exception
-            throw new AuthenticationException('Неправильный логин или пароль');
-//            return response()->json(['error' => 'Неправильный логин или пароль'], 401);
+            throw new AuthenticationException('Пользователь не найден. Неправильный логин или пароль');
+            // return response()->json(['error' => 'Неправильный логин или пароль'], 401);
         }
-        // Выдать токен пользователю
-        $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Создаём токен пользователю
+        $new_token = $current_user->createToken('auth_token')->plainTextToken;
 
         // Последний токен пользователя
-        $last_token = SystemUsersToken::userLastTokenData($user->user_id);
+        $last_token
+            = SystemUsersToken::userLastTokenData($current_user->user_id);
 
         if ($last_token) {
-            $last_token = $last_token->toArray();
-            $participation_id = $last_token['participation_id'] ?? null;
+            // $last_token = $last_token->toArray();
+            /** @var int|null $participation_id */
+            $participation_id = $last_token->participation_id ?? null;
         } else {
             // получаем связку пользователя с хозяйствами/регионами/районами
-            $participation_last = DataUsersParticipations::where([
-                ['user_id', '=', $user['user_id']],
-                ['participation_status', '=', SystemStatusEnum::ENABLED->value]
-            ])
+            $participation_last = DataUsersParticipations::where(
+                [
+                    ['user_id', '=', $current_user['user_id']],
+                    [
+                        'participation_status', '=',
+                        SystemStatusEnum::ENABLED->value
+                    ]
+                ]
+            )
                 ->latest('updated_at')
                 ->first();
             // если привязка есть
@@ -95,52 +108,66 @@ class ApiSelexController extends Controller
                 $participation_id = $participation_last['participation_id'];
             } else {
                 throw new AuthenticationException('Пользователь не привязан ни к одному хозяйству/району/региону');
-//                return response()->json(['error' => 'Пользователь не привязан ни к одному хозяйству/району/региону'], 401);
+                // return response()->json(['error' => 'Пользователь не привязан ни к одному хозяйству/району/региону'], 401);
             }
         }
 
         // Создали запись в таблице токенов
         (new SystemUsersToken())->userTokenStore([
-            'user_id' => $user['user_id'],
+            'user_id'          => $current_user['user_id'],
             'participation_id' => $participation_id,
-            'token_value' => $token,
-            'token_client_ip' => $request->ip()
+            'token_value'      => $new_token,
+            'token_client_ip'  => $request->ip()
         ]);
-
-
         // роль "Ветеринарный врач хозяйства"
         /** @var Collection $role_data */
-        $role_data = $this->user_role_data($user['user_id'], 'doctor_company');
+        $role_data = $this->user_role_data($current_user['user_id'],
+            'doctor_company');
         // проверка роли "Ветеринарный врач хозяйства"
         if ($role_data->isEmpty()) {
-            return response()->json(['error' => 'У пользователя отсутствует роль "Ветеринарный врач хозяйства"'], 401);
+            return response()->json(['error' => 'У пользователя отсутствует роль "Ветеринарный врач хозяйства"'],
+                401);
         }
         // Проверка наличия у пользователя в списке переданного хозяйства и получение его ссылочного ключа company_location_id
-        $participation_item_id = $this->check_base_index_from_user($request);  // ссылочный ключ на хозяйства, который назначен хозяйству
-        $participation_type = 'company';                                    // тип участника - компания
+        $participation_item_id
+            = $this->check_base_index_from_user(collect($current_user));  // ссылочный ключ на хозяйства, который назначен хозяйству
+        $participation_type
+            = 'company';                                    // тип участника - компания
 
         if ($participation_item_id === false) {
-            throw new InvalidArgumentException('Пользователь не привязан к указанному хозяйству', 401);
+            throw new InvalidArgumentException('Пользователь не привязан к указанному хозяйству',
+                401);
         }
 
         // добавляем в контейнер данных из переданного запроса новые поля и значения
         $data['participation_item_id'] = $participation_item_id;
-        $data['participation_type'] = $participation_type;
+        $data['participation_item_type'] = $participation_type;
 
         // правила валидации
-        $valid_data = $this->validate(
-            [
-                'participation_item_id' => ['required', 'int'],
-                'participation_type' => ['required', 'in_array:company'],
-            ], $data);
+         // валидация запроса
+        $model = new DataUsersParticipations();
+        // - готовим список необходимых полей для валидации
+        $filterKeys = ['participation_item_id', 'participation_item_type'];
+        // - собираем набор правил и сообщений
+        $rules = $model->getFilterValidationRules($request, $filterKeys);
+        $messages = $model->getFilterValidationMessages($filterKeys);
+
+        // - переопределяем ключи и правила
+        $rules['participation_item_id'] = "required|".$rules['participation_item_id'];
+        // - проверяем запрос на валидацию
+        $valid_data = Validator::make($data, $rules, $messages)->validate();
 
         // переключаем пользователя на работу с указанным хозяйством
-        $auth = new module_Auth();
-        $auth_set_result = $auth->api_set_v1($valid_data, ['user_id' => $this->USER('user_id'), 'token_id' => $this->USER('token_id')]);
+        $auth = new DataUsersParticipations();
+        $auth_set_result = $auth->api_set_v1($valid_data, [
+            'user_id'  => $this->USER('user_id'),
+            'token_id' => $this->USER('token_id')
+        ]);
 
         if ($auth_set_result) {
             $data = $this->response_data();
-            $user_token = (isset($data['user_token'])) ? $data['user_token'] : '';
+            $user_token = (isset($data['user_token'])) ? $data['user_token']
+                : '';
             $this->response_clear();
             $this->response_data('user_token', $user_token);
             $this->response_message('Выдан токен');
@@ -170,42 +197,42 @@ class ApiSelexController extends Controller
 
         return response()->json(
             [
-                "status" => true,
-                "data" => [
+                "status"        => true,
+                "data"          => [
                     "list_animals" => [
                         [
-                            "nanimal" => 1188540001223,
+                            "nanimal"      => 1188540001223,
                             "nanimal_time" => "1188540001223",
-                            "guid_svr" => "0eb6679a-cc33-458a-9fdf-d179b0ccb602",
-                            "duble" => true,
-                            "status" => false
+                            "guid_svr"     => "0eb6679a-cc33-458a-9fdf-d179b0ccb602",
+                            "duble"        => true,
+                            "status"       => false
                         ],
                         [
-                            "nanimal" => "1188540001242",
+                            "nanimal"      => "1188540001242",
                             "nanimal_time" => "1184540001523",
-                            "guid_svr" => "e8103cb0-c77f-469c-af86-cf26fa525fba",
-                            "duble" => true,
-                            "status" => true
+                            "guid_svr"     => "e8103cb0-c77f-469c-af86-cf26fa525fba",
+                            "duble"        => true,
+                            "status"       => true
                         ],
                         [
-                            "nanimal" => "1188540001243",
+                            "nanimal"      => "1188540001243",
                             "nanimal_time" => "1184540001523",
-                            "guid_svr" => "118efde1-58e1-426d-a5d0-bed0340c3458",
-                            "duble" => false,
-                            "status" => true
+                            "guid_svr"     => "118efde1-58e1-426d-a5d0-bed0340c3458",
+                            "duble"        => false,
+                            "status"       => true
                         ]
                     ]
                 ],
-                "message" => "Операция выполнена",
+                "message"       => "Операция выполнена",
                 "notifications" => [
-                    "count_new" => 3,
+                    "count_new"   => 3,
                     "count_total" => 12
                 ],
-                "pagination" => [
+                "pagination"    => [
                     "total_records" => 0,
-                    "max_page" => 1,
-                    "cur_page" => 1,
-                    "per_page" => 100
+                    "max_page"      => 1,
+                    "cur_page"      => 1,
+                    "per_page"      => 100
                 ]
             ]
         );
@@ -214,28 +241,34 @@ class ApiSelexController extends Controller
 
 
     /**
-     * @param integer $user_id
-     * @param string  $role_slug
+     * @param  integer  $user_id
+     * @param  string  $role_slug
+     *
      * @return Collection
      */
     private function user_role_data($user_id, $role_slug): Collection
     {
-        $result = collect(DB::table(SystemUsersRoles::getTableName() . ' as ur')
+        $result = collect(DB::table(SystemUsersRoles::getTableName().' as ur')
             ->select(
-                ['ur.*',
+                [
+                    'ur.*',
                     'r.role_id',
                     'r.role_name_long',
                     'r.role_name_short',
                     'r.role_slug'
                 ]
             )
-            ->leftjoin(SystemRoles::getTableName() . ' AS r', 'r.role_slug', '=', 'ur.role_slug')
+            ->leftjoin(SystemRoles::getTableName().' AS r', 'r.role_slug', '=',
+                'ur.role_slug')
             ->where(
                 [
                     ['ur.user_id', '=', $user_id],
                     ['ur.role_slug', '=', $role_slug],
                     ['r.role_status', '=', SystemStatusEnum::ENABLED->value],
-                    ['r.role_status_delete', '=', SystemStatusDeleteEnum::ACTIVE->value]
+                    [
+                        'r.role_status_delete', '=',
+                        SystemStatusDeleteEnum::ACTIVE->value
+                    ]
                 ]
             )
             ->first());
@@ -246,22 +279,30 @@ class ApiSelexController extends Controller
      * Проверка наличия у пользователя в списке переданного хозяйства
      * и получение его ссылочного ключа company_location_id
      *
-     * @param Request $data - контейнер данных из переданного запроса
+     * @param  Collection  $current_user  - данные текущего пользователя
      */
-    private function check_base_index_from_user(Request $data)
+    private function check_base_index_from_user(Collection $current_user)
     {
         // получаем базовый индекс хозяйства
-        $company_base_index = (isset($data['base_index'])) ? $data['base_index'] : false;
+        $company_base_index = (isset($current_user['user_base_index'])) ? $current_user['user_base_index']
+            : false;
 
         // получаем данные из справочника (Установка справочника ответа)
 //        $data = $this->response_dictionary();
 
         // подготовим для перебора необходимую область (ключ) из справочника (список подключенных хозяйств)
-        $user_companies_locations_list = DataUsersParticipations::userCompaniesLocationsList($data['user_id'])->all();
-
+        $user_companies_locations_list
+            = DataUsersParticipations::userCompaniesLocationsList($current_user['user_id'])
+            ->all();
         // получаем данные о компании по ее базовому индексу
+
         $company_data = $this->company_data(false, false, $company_base_index);
-        $company_id = (isset($company_data['company_id'])) ? $company_data['company_id'] : false;
+        if ($company_data === false || $company_data->isEmpty()) {
+            throw new AuthenticationException('Не найдены компании по базовому индексу хозяйства');
+        }
+        $company_id = (isset($company_data['company_id']))
+            ? $company_data['company_id'] : false;
+
         // получаем связь компании с пользователем
         // - введем переменную локации со значением по умолчанию - false;
         $company_location_id = false;
@@ -269,14 +310,14 @@ class ApiSelexController extends Controller
         // - сделаем перебор списка хозяйств, назначенных пользователю
         foreach ($user_companies_locations_list as $item) {
             // проверим, есть ли компания, которая нас интересует
-            $company_location_id = ($item['company_id'] === $company_id)
-                ? $item['company_location_id']
+            $company_location_id = ($item->company_id === $company_id)
+                ? $item->company_location_id
                 : $company_location_id;
         }
 
         // если пользователю не назначено хозяйство или не найдено
         if ($company_location_id === false) {
-            throw new AuthenticationException('Переданный базовый индекс хозяйства не привязан к учетной записи');
+            throw new AuthenticationException('Переданный базовый индекс хозяйства не привязан к учетной записи пользователя.');
         }
 
         // возвращаем флаг проверки
@@ -285,18 +326,25 @@ class ApiSelexController extends Controller
 
 
     /**
-     * Метод получения данных компании по company_id (фермерской хозяйств) из БД
-     * получаем данные о компании по ее базовому индексу
-     * Таблица: data.data_companies
-     * @param boolean|int    $company_id
-     * @param boolean|string $guid_vetis
-     * @param bool|string    $base_index
-     * @return Collection|bool
+     * Метод получения данных компании по company_id (фермерской хозяйств) из
+     * БД получаем данные о компании по ее базовому индексу Таблица:
+     * data.data_companies
+     *
+     * @param  false|int  $company_id
+     * @param  false|string  $guid_vetis
+     * @param  false|string  $base_index
+     *
+     * @return Collection|false
      */
-    private function company_data(bool|int $company_id = false, bool|string $guid_vetis = false, bool $base_index = false): Collection|bool
-    {
+    private function company_data(
+        false|int        $company_id = false,
+        false|string     $guid_vetis = false,
+        false|string     $base_index = false
+    ): Collection|false {
 
-        if ((bool)$company_id === false && (bool)$guid_vetis === false && (bool)$base_index === false) {
+        if ((bool) $company_id === false && (bool) $guid_vetis === false
+            && (bool) $base_index === false
+        ) {
             return false;
         }
 
@@ -309,7 +357,7 @@ class ApiSelexController extends Controller
         }
 
         if ($base_index) {
-            $where = ['company_guid_vetis', '=', $base_index];
+            $where = ['company_base_index', '=', $base_index];
         }
 
         $result = collect(DataCompanies::where([$where])->first());
