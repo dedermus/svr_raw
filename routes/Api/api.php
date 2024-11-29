@@ -1,22 +1,30 @@
 <?php
 
-use Svr\Raw\Middleware\ApiValidationErrors;
 use Illuminate\Support\Facades\Route;
-use Svr\Raw\Controllers\Api\ApiFromSelexBeefController;
+use Svr\Raw\Controllers\Api\ApiSelexController;
 
 /*
 |--------------------------------------------------------------------------
-| Laravel Roles API RAW Routes
+| Laravel Roles API CORE Routes
 |--------------------------------------------------------------------------
 |
 */
 
-Route::middleware('api')
-    ->prefix('v1')
-    ->middleware(ApiValidationErrors::class)
-    ->group(function () {
-        Route::post('selex/get_animals/',       [ApiFromSelexBeefController::class, 'get_animals']);      // Получение списка записей по GUID_SVR.
+Route::prefix(config('svr.api_prefix'))->group(function () {
 
-//        Route::post('selex/',       [ApiFromSelexBeefController::class, 'store']);      // Для создания новой записи
-//        Route::post('selex/',       [ApiFromSelexBeefController::class, 'update']);     // Для обновления существующей записи
-    });
+    /** Авторизация */
+    Route::post('selex/login', [ApiSelexController::class, 'selexLogin']);
+
+    /** Передача данных в СВР со стороны модуля обмена */
+    Route::post('selex/send_animals', [ApiSelexController::class, 'selexSendAnimals'])->middleware([
+//        'auth:svr_api',
+//        'api'
+    ]);
+
+    /** Получение данных из СВР со стороны модуля обмена */
+    Route::post('selex/check_animals', [ApiSelexController::class, 'selexCheckAnimals'])->middleware([
+//        'auth:svr_api',
+//        'api'
+    ]);
+
+});
