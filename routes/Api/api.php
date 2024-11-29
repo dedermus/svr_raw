@@ -17,14 +17,14 @@ Route::prefix(config('svr.api_prefix'))->group(function () {
 
     /** Передача данных в СВР со стороны модуля обмена */
     Route::post('selex/send_animals', [ApiSelexController::class, 'selexSendAnimals'])->middleware([
-//        'auth:svr_api',
-//        'api'
+       'auth:svr_api',
+       'api'
     ]);
 
     /** Получение данных из СВР со стороны модуля обмена */
     Route::post('selex/check_animals', [ApiSelexController::class, 'selexCheckAnimals'])->middleware([
-//        'auth:svr_api',
-//        'api'
+       'auth:svr_api',
+       'api'
     ]);
 
 });
