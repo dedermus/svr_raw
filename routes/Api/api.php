@@ -5,7 +5,7 @@ use Svr\Raw\Controllers\Api\ApiSelexController;
 
 /*
 |--------------------------------------------------------------------------
-| Laravel Roles API CORE Routes
+| Laravel Roles API RAW Routes
 |--------------------------------------------------------------------------
 |
 */
