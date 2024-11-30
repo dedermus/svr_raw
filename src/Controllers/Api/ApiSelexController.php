@@ -158,12 +158,13 @@ class ApiSelexController extends Controller
     function selexSendAnimals(Request $request): JsonResponse
     {
         $current_user = auth()->user();
+        // получаем данные по компании по данным пользователя
         $company_data_location = DataCompaniesLocations::where('company_location_id', '=', $current_user['company_location_id'])->first();
-        // получаем данные по компании
         $company_data = DataCompanies::where('company_id', '=', $company_data_location['company_id'])->first();
         // получаем базовый индекс компании $company_base_index
         $company_base_index = $company_data['company_base_index'];
-        // получаем базовый индекс из секции main.base_index (из body $request ($base_index = $this->check_base_index($data); Из $data['main']['base_index']))
+
+        // получаем базовый индекс из входящих данных (Request)
         $base_index = $request['main']['base_index'];
 
         // сравниваем базовые индексы: полученные из $company_id пользователя и переданные из секции MAIN
@@ -172,14 +173,59 @@ class ApiSelexController extends Controller
                 401);
         }
 
+        /** @var array $exclude_fields - список полей, которые не входят в список обязательных полей для анализа */
+        $exclude_fields = [
+            'raw_from_selex_milk_id',   // инкремент молочных коров КРС
+            'raw_from_selex_beef_id',   // инкремент мясных коров КРС
+            'raw_from_selex_sheep_id',  // инкремент овец МРС
+            'animals_json',             // сырые данные из Селекс
+            'import_status',            // ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)
+            'created_at',               // Дата и время создания
+            'update_at',                // Дата и время модификации
+            'task',                     // код задачи берется из таблицы TASKS.NTASK (1 – молоко / 6- мясо / 4 - овцы)
+            'status',                   // статус обработки записи
+        ];
+
+        // код задачи из секции MAIN
+        $name_table = $this->switch_table($request['main']['task']);
+
+        // получаем список полей из таблицы
+        $table_columns = Schema::getColumns($name_table);
+
+        // на основе списка полей получаем правила валидации
+        $rules = $this->get_rules_by_columns($table_columns, $exclude_fields);
+
         // проверяем статус, задачу, секции MAIN и поля в секции ANIMALS
         // проверка через стандартный validator. Поля таблицы из БД, правила валидации из модели
-        $this->validate_structure_request($request);
+        $this->validate_structure_request($request, $rules);
 
         // сохраняем данные по животным
+        // TODO ждет реализации
 
         return response()->json(['test' => 'test'], 200);
     }
+
+    /**
+     * Метод получения правил валидации из списка полей таблицы и списка исключений
+     *
+     * @param array $table_columns  - список полей таблицы
+     * @param array $exclude_fields - список полей для исключения. Поля не входят в список полей для анализа
+     */
+    private function get_rules_by_columns(array $table_columns, array $exclude_fields): array
+    {
+        $list_fields = [];
+        // проходим по всем полям. Создаем правила валидации
+        foreach ($table_columns as $item) {
+            // dump($item);
+            // если поле из таблицы не равно списку исключения, то добавим его в список полей
+            if (!in_array(strtolower($item['name']), $exclude_fields)) {
+                $rule = 'present';  // present - обязательное поле и оно может быть null в отличие от required
+                $list_fields['animals.*.' . $item['name']] = $rule;
+            }
+        }
+        return $list_fields;
+    }
+
 
     /**
      * Получение данных из СВР со стороны модуля обмена
@@ -490,55 +536,33 @@ class ApiSelexController extends Controller
 
     /**
      * Проверка структуры переданных данных
-     * 1. Наличие всех обязательных полей
-     * 2. Валидность полей
-     * 3. Наличие полей согласно таблице БД
+     * - Наличие всех обязательных полей
+     * - Наличие полей согласно таблице БД
      *
      * @param Request $request - Входные данные в метод selexSendAnimals со стороны модуля обмена
-     * @return true
+     * @param array $rules - Правила валидации на основе полей таблицы БД
+     * @return void
      */
-    private function validate_structure_request(Request $request): true
+    private function validate_structure_request(Request $request, array $rules): void
     {
-        /** @var array $exception_fields - список полей, которые не входят в список обязательных полей для анализа */
-        $exception_fields = [
-            'raw_from_selex_milk_id',   // инкремент молочных коров КРС
-            'raw_from_selex_beef_id',   // инкремент мясных коров КРС
-            'raw_from_selex_sheep_id',  // инкремент овец МРС
-            'animals_json',             // сырые данные из Селекс
-            'import_status',            // ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)
-            'created_at',               // Дата и время создания
-            'update_at',                // Дата и время модификации
-            'task',                     // код задачи берется из таблицы TASKS.NTASK (1 – молоко / 6- мясо / 4 - овцы)
-            'status',                   // статус обработки записи
-        ];
-
-        // код задачи из секции MAIN
-        $name_table = $this->switch_table($request['main']['task']);
-        $table_columns = collect(Schema::getColumns($name_table));
-        $list_fields = false;
-        foreach ($table_columns as $item) {
-            // dump($item);
-            // если поле из таблицы не равно списку исключения, то добавим его в список полей
-            if (array_search(strtolower($item['name']), $exception_fields) === false) {
-                $rule = 'present';  // present - обязательное поле и оно может быть null в отличие от required
-                $list_fields['animals.*.' . $item['name']] = $rule;
-            }
-        }
-
         // Валидация данных
-        $request->validate([
-            'main.base_index' => 'required|numeric',
-            'main.task' => ['present', 'numeric', 'in:1,4,6'],
-            'animals' => 'present',
-            // проверка на наличие обязательных полей в секции ANIMALS
-            ...$list_fields
-        ], [
-            'main.base_index.required' => 'Не передан базовый индекс в секции MAIN',
-            'main.task.in' => 'Переданный код задачи :input не сопоставлен ни с одним из типов известных задач (1 – молоко / 6- мясо / 4 - овцы).',
-            'animals.required' => 'Отсутствует секция ANIMALS или она пустая',
-            '*.*.*.present' => 'Атрибут :attribute в секции ANIMALS обязателен.',
-        ]);
-        return true;
+        Validator::make(
+            data: $request->all(),
+            rules: [
+                'main.base_index' => 'required|numeric',
+                'main.task' => ['present', 'numeric', 'in:1,4,6'],
+                'animals' => 'present',
+                // проверка полей в секции ANIMALS
+                ...$rules
+            ],
+            messages: [
+                'main.base_index.required' => 'Не передан базовый индекс в секции MAIN',
+                'main.task.in' => 'Переданный код задачи :input не сопоставлен ни с одним из типов известных задач (1 – молоко / 6- мясо / 4 - овцы).',
+                'animals.required' => 'Отсутствует секция ANIMALS или она пустая',
+                '*.*.*.present' => 'Атрибут :attribute в секции ANIMALS обязателен.',
+            ]
+        )
+            ->validate();
     }
 
 
