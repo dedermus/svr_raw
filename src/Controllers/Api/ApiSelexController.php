@@ -19,12 +19,15 @@ use Svr\Core\Models\SystemRoles;
 use Svr\Core\Models\SystemUsers;
 use Svr\Core\Models\SystemUsersRoles;
 use Svr\Core\Models\SystemUsersToken;
+use Svr\Core\Resources\SvrApiResponseResource;
 use Svr\Data\Models\DataCompanies;
 use Svr\Data\Models\DataCompaniesLocations;
 use Svr\Data\Models\DataUsersParticipations;
 use Svr\Raw\Models\FromSelexBeef;
 use Svr\Raw\Models\FromSelexMilk;
 use Svr\Raw\Models\FromSelexSheep;
+use Svr\Raw\Resources\SelexSendAnimalsCollection;
+use Svr\Raw\Resources\SelexSendAnimalsResource;
 use Symfony\Component\Mailer\Exception\InvalidArgumentException;
 use Symfony\Component\Uid\Uuid;
 
@@ -156,7 +159,7 @@ class ApiSelexController extends Controller
      * Передача данных в СВР со стороны модуля обмена
      * (Закачка животных из Селекс в таблицы с сырыми данными)
      */
-    public function selexSendAnimals(Request $request): JsonResponse
+    public function selexSendAnimals(Request $request): SvrApiResponseResource
     {
         $current_user = auth()->user();
         // получаем данные по компании по данным пользователя
@@ -179,11 +182,11 @@ class ApiSelexController extends Controller
             'raw_from_selex_milk_id',   // инкремент молочных коров КРС
             'raw_from_selex_beef_id',   // инкремент мясных коров КРС
             'raw_from_selex_sheep_id',  // инкремент овец МРС
-            'animals_json',             // сырые данные из Селекс
-            'import_status',            // ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)
+            'ANIMALS_JSON',             // сырые данные из Селекс
+            'IMPORT_STATUS',            // ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)
             'created_at',               // Дата и время создания
             'update_at',                // Дата и время модификации
-            'task',                     // код задачи берется из таблицы TASKS.NTASK (1 – молоко / 6- мясо / 4 - овцы)
+            'TASK',                     // код задачи берется из таблицы TASKS.NTASK (1 – молоко / 6- мясо / 4 - овцы)
             'status',                   // статус обработки записи
         ];
 
@@ -206,9 +209,24 @@ class ApiSelexController extends Controller
         $this->validate_structure_request($request, $rules);
 
         // сохраняем данные по животным
-        $res = $this->add_animals($request, $table_name);
+        $result_animals = $this->add_animals($request, $table_name);
 
-        return response()->json(['test' => 'test'], 200);
+        $data = collect([
+            'status' => true,
+            'result_animals' => $result_animals,
+            'message' => 'Операция выполнена',
+            'user_id' => $current_user['user_id'],
+            'response_resource_data' => SelexSendAnimalsCollection::class,
+            'response_resource_dictionary' => false,
+            'pagination' => [
+                'total_records' => 1,
+                'cur_page' => 1,
+                'per_page' => 1
+            ],
+        ]);
+
+        return new SvrApiResponseResource($data);
+
     }
 
 
@@ -219,32 +237,24 @@ class ApiSelexController extends Controller
      * @param Request|Collection $data - контейнер, содержащий параметры для записи данных
      * @param string $table_name - имя таблицы
      */
-    private function add_animals(Request|Collection $data, string $table_name): JsonResponse
+    private function add_animals(Request|Collection $data, string $table_name): array
     {
         // Если $data является объектом типа Request, преобразовать в коллекцию
         if ($data instanceof Request) {
             $data = collect($data->all());
         }
 
-        // В свр в data
-        //     'task'          => $task,           // код задачи
-        //     'base_index'    => $base_index,     // базовый индекс компании               $data['main']['base_index']
-        //     'list_fields'   => $list_fields,    // поля в таблице для заполнения
-        //     'list_animals'  => $list_animals,   // список животных                       $data['animals']
-        //     'table_name'    => $table_name,     // имя таблицы                           $table_name
-
-
         $list_date_field = [
-            'date_rogd',
-            'date_postupln',
-            'date_v',
-            'date_chip',
-            'date_ninv',
-            'date_ngosregister',
-            'date_rogd_materi',
-            'date_rogd_otca',
-            'date_ninvright',
-            'date_ninvleft'
+            'DATE_ROGD',
+            'DATE_POSTUPLN',
+            'DATE_V',
+            'DATE_CHIP',
+            'DATE_NINV',
+            'DATE_NGOSREGISTER',
+            'DATE_ROGD_MATERI',
+            'DATE_ROGD_OTCA',
+            'DATE_NINVRIGHT',
+            'DATE_NINVLEFT'
         ];
         // результат обработки по каждому из переданных животных
         $result_animals = [];
@@ -252,9 +262,10 @@ class ApiSelexController extends Controller
         $result = false;
         // список животных
         $list_animals = (isset($data['animals'])) ? $data['animals'] : false;
-
+        // TODO? Думаю нужно убрать, т.к. $table_name обязательный параметр на входе метода. animals проверяется в validate_structure_request
         if ($list_animals && $table_name) {
 
+            // получаем список животных из БД СВР
             $nanimals_list = array_column($list_animals, 'NANIMAL_TIME');
             $nanimals_data = DB::table($table_name)
                 ->select('GUID_SVR', 'NANIMAL', 'NANIMAL_TIME')
@@ -265,31 +276,32 @@ class ApiSelexController extends Controller
                         ['NANIMAL_TIME', '!=', null]
                     ]
                 )
-                ->whereIn('NANIMAL_TIME', $nanimals_list)->get()->toArray();
+                ->whereIn('NANIMAL_TIME', $nanimals_list)->get();
 
-            // $nanimals_data = $this->get_data(DB_MAIN,
-            //     'SELECT guid_svr, nanimal, nanimal_time FROM ' . SCHEMA_RAW . '.' . $table_name . ' WHERE nanimal_time IN (\'' . implode('\',\'', $nanimals_list) . '\') AND nhoz = :nhoz',
-            //     ['nhoz' => $data['base_index']], 'rows', 'nanimal_time');
+            $nanimals_data = collect($nanimals_data)->keyBy('NANIMAL_TIME');
+
+            // Преобразуем коллекцию $nanimals_data которая содержит объекты stdClass в массивы
+            $nanimals_data = $nanimals_data->map(function ($item) {
+                return (array)$item;
+            });
 
             foreach ($list_animals as $animal) {
-                $animal = array_change_key_case($animal);
+                // $animal = array_change_key_case($animal);
 
-                if (isset($nanimals_data[$animal['nanimal_time']])) {
-                    $result_animals [] = [
-                        'nanimal' => (isset($nanimals_data[$animal['nanimal_time']]['nanimal'])) ? $nanimals_data[$animal['nanimal_time']]['nanimal'] : null,
-                        'nanimal_time' => (isset($nanimals_data[$animal['nanimal_time']]['nanimal_time'])) ? $nanimals_data[$animal['nanimal_time']]['nanimal_time'] : null,
-                        'guid_svr' => (isset($nanimals_data[$animal['nanimal_time']]['guid_svr'])) ? $nanimals_data[$animal['nanimal_time']]['guid_svr'] : null,
-                        'status' => true,
-                        'double' => true
-                    ];
-                    $result = true;
+                if (isset($nanimals_data[$animal['NANIMAL_TIME']])) {
+                    $result_animals [] = SelexSendAnimalsResource::make(
+                        [
+                            'nanimal' => $nanimals_data[$animal['NANIMAL_TIME']]['NANIMAL'] ?? null,
+                            'nanimal_time' => $nanimals_data[$animal['NANIMAL_TIME']]['NANIMAL_TIME'] ?? null,
+                            'guid_svr' => $nanimals_data[$animal['NANIMAL_TIME']]['GUID_SVR'] ?? null,
+                            'status' => true,
+                            'double' => true
+                        ]
+                    );
                     continue;
                 }
 
-                // формируем JSONB
-                $jsonB = json_encode(array_change_key_case($animal), JSON_UNESCAPED_UNICODE);
-
-                $guid_svr = (isset($animal['guid_svr'])) ? $animal['guid_svr'] : false;
+                $guid_svr = (isset($animal['GUID_SVR'])) ? $animal['GUID_SVR'] : false;
 
                 if (empty($guid_svr)) {
                     // уберем все значения с NULL
@@ -304,56 +316,58 @@ class ApiSelexController extends Controller
                     $animal = $temp_animal;
 
                     // Генерация GUID v4 'UUID4'
-                    $animal['guid_svr'] = Uuid::v4()->toString();
+                    $animal['GUID_SVR'] = Uuid::v4()->toString();
 
-                    // форматируем даты
+                    // форматируем даты. Переводим формат даты с разделителем '-'. Формат 'Y-m-d'
                     foreach ($list_date_field as $date_field) {
                         if (isset($animal[$date_field])) {
                             $animal[$date_field] = strtotime($animal[$date_field]) ? date('Y-m-d', strtotime($animal[$date_field])) : null;
                         }
                     }
 
-                    // формируем JSONB
-                    $animal['animals_json'] = $jsonB;
-                    // добавляем животное. Но нужно добавить проверки.
-                    // !!! Может сделать возможность передавать и Request и Collection ??? Минимальные изменения
-                    // В проверке использовать Validator::make()
-                    // array в Request Request::create()->replace($animal)
-                    (new FromSelexMilk)->createRaw(Request::create()->replace(
-                        $animal
-                    ));
+                    // формируем JSONB для поля ANIMALS_JSON
+                    $animal['ANIMALS_JSON'] = json_encode(array_change_key_case($animal), JSON_UNESCAPED_UNICODE);
 
-                    // DB::table($table_name)->insert(
-                    //     $animal
-                    // );
+                    // Модель в зависимости от номера task
+                    if ($table_name === FromSelexMilk::getTableName()) {
+                        $table = new FromSelexMilk;
+                    } elseif ($table_name === FromSelexBeef::getTableName()) {
+                        $table = new FromSelexBeef;
+                    } elseif ($table_name === FromSelexSheep::getTableName()) {
+                        $table = new FromSelexSheep;
+                    }
 
-                    // $this->insert(DB_MAIN, SCHEMA_RAW . '.' . $table_name, $animal);
+                    // добавляем животное в таблицу
+                    $table->createRaw($animal);
 
-                    $result_animals [] = [
-                        'nanimal' => (isset($animal['nanimal'])) ? $animal['nanimal'] : null,
-                        'nanimal_time' => (isset($animal['nanimal_time'])) ? $animal['nanimal_time'] : null,
-                        'guid_svr' => (isset($animal['guid_svr'])) ? $animal['guid_svr'] : null,
-                        'status' => true,
-                        'double' => false
-                    ];
-                    $result = true;
+                    $result_animals [] = SelexSendAnimalsResource::make(
+                        [
+                            'nanimal' => $animal['NANIMAL'] ?? null,
+                            'nanimal_time' => $animal['NANIMAL_TIME'] ?? null,
+                            'guid_svr' => $animal['GUID_SVR'] ?? null,
+                            'status' => true,
+                            'double' => false
+                        ]
+                    );
+
                 } else {
-                    $result_animals [] = [
-                        'nanimal' => (isset($animal['nanimal'])) ? $animal['nanimal'] : null,
-                        'nanimal_time' => (isset($animal['nanimal_time'])) ? $animal['nanimal_time'] : null,
-                        'guid_svr' => (isset($animal['guid_svr'])) ? $animal['guid_svr'] : null,
-                        'status' => false,
-                        'double' => false
-                    ];
-                    $result = true;
+
+                    $result_animals [] = SelexSendAnimalsResource::make(
+                        [
+                            'nanimal' => $animal['NANIMAL'] ?? null,
+                            'nanimal_time' => $animal['NANIMAL_TIME'] ?? null,
+                            'guid_svr' => $animal['GUID_SVR'] ?? null,
+                            'status' => false,
+                            'double' => false
+                        ]
+                    );
                 }
             }
         } else {
             throw new Exception(message: 'Переданные данные по животным не сохранены',
                 code: 500);
         }
-
-        return response()->json($result_animals);
+        return $result_animals;
     }
 
 
@@ -369,8 +383,9 @@ class ApiSelexController extends Controller
         // проходим по всем полям. Создаем правила валидации
         foreach ($table_columns as $item) {
             // dump($item);
-            // если поле из таблицы не равно списку исключения, то добавим его в список полей
-            if (!in_array(strtolower($item['name']), $exclude_fields)) {
+            // если поле name из таблицы не найдено в списке исключения, то добавим его в список полей.
+            // Сравнение регистронезависимое
+            if (!in_array($item['name'], $exclude_fields)) {
                 $rule = 'present';  // present - обязательное поле и оно может быть null в отличие от required
                 $list_fields['animals.*.' . $item['name']] = $rule;
             }
