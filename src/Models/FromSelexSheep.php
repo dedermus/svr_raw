@@ -233,7 +233,7 @@ class FromSelexSheep extends Model
             'NINVRIGHT_MATERI' => 'max:15|nullable',
             'NINVLEFT_MATERI' => 'max:15|nullable',
             'NGOSREGISTER_MATERI' => 'max:50|nullable',
-            'IMPORT_STATUS' => ['required',
+            'IMPORT_STATUS' => ['nullable',
                 Rule::enum(ImportStatusEnum::class)],
             'TASK' => 'integer|nullable',
             'GUID_SVR' => 'max:64|nullable',

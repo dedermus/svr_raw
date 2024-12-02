@@ -242,7 +242,7 @@ class FromSelexMilk extends Model
             'POR_MATERI' => 'max:30|nullable',
             'NPOR_MATERI' => 'integer|nullable',
             'DATE_ROGD_MATERI' => 'date|nullable',
-            'IMPORT_STATUS' => ['required',
+            'IMPORT_STATUS' => ['nullable',
                 Rule::enum(ImportStatusEnum::class)],
             'TASK' => 'integer|nullable',
             'GUID_SVR' => 'max:64|nullable',
