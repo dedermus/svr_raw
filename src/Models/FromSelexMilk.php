@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Svr\Core\Enums\ImportStatusEnum;
-use Svr\Core\Traits\GetValidationRules;
 use Svr\Core\Traits\GetTableName;
+use Svr\Core\Traits\GetValidationRules;
 
 /**
  * Модель: сырые данные из Селекс для молочных коров
@@ -77,12 +77,18 @@ class FromSelexMilk extends Model
     /**
      * Создать запись
      *
-     * @param Request $request
+     * @param Request|array $request
      *
      * @return void
      */
-    public function createRaw(Request $request): void
+    public function createRaw(Request|array $request): void
     {
+        if (!$request instanceof Request) {
+            $request = Request::create(
+                uri: '/',
+                method: 'post'
+            )->replace($request);
+        }
         $this->validateRequest($request);
         $data = $request->all();
         self::create($data);
@@ -195,7 +201,6 @@ class FromSelexMilk extends Model
                 $request->isMethod('put') ? 'required' : '',
                 Rule::exists('.' . $this->getTable(), $this->primaryKey),
             ],
-            $this->primaryKey => 'required|exists:.' . $this->getTable() . ',' . $this->primaryKey,
             'NANIMAL' => 'integer|nullable',
             'NANIMAL_TIME' => 'max:128|nullable',
             'NINV' => 'max:15|nullable',
