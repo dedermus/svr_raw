@@ -20,6 +20,8 @@ use Svr\Core\Models\SystemUsers;
 use Svr\Core\Models\SystemUsersRoles;
 use Svr\Core\Models\SystemUsersToken;
 use Svr\Core\Resources\SvrApiResponseResource;
+use Svr\Data\Models\DataAnimals;
+use Svr\Data\Models\DataApplicationsAnimals;
 use Svr\Data\Models\DataCompanies;
 use Svr\Data\Models\DataCompaniesLocations;
 use Svr\Data\Models\DataUsersParticipations;
@@ -375,52 +377,118 @@ class ApiSelexController extends Controller
     /**
      * Получение данных из СВР со стороны модуля обмена
      */
-    public function selexCheckAnimals(Request $request): JsonResponse
+    public function selexGetAnimals(Request $request): SvrApiResponseResource
     {
+        // Проверка входящих данных
+        $request->validate([
+            'list_animals_guid_svr' => 'required|array',
+        ], [
+            'list_animals_guid_svr.required' => 'Поле list_animals_guid_svr обязательно для заполнения',
+            'list_animals_guid_svr.array' => 'Поле list_animals_guid_svr должно быть массивом',
+        ]);
 
-        return response()->json(
-        // [
-        // "status"        => true,
-        // "data"          => [
-        //     "list_animals" => [
-        //         [
-        //             "nanimal"      => 1188540001223,
-        //             "nanimal_time" => "1188540001223",
-        //             "guid_svr"     => "0eb6679a-cc33-458a-9fdf-d179b0ccb602",
-        //             "duble"        => true,
-        //             "status"       => false
-        //         ],
-        //         [
-        //             "nanimal"      => "1188540001242",
-        //             "nanimal_time" => "1184540001523",
-        //             "guid_svr"     => "e8103cb0-c77f-469c-af86-cf26fa525fba",
-        //             "duble"        => true,
-        //             "status"       => true
-        //         ],
-        //         [
-        //             "nanimal"      => "1188540001243",
-        //             "nanimal_time" => "1184540001523",
-        //             "guid_svr"     => "118efde1-58e1-426d-a5d0-bed0340c3458",
-        //             "duble"        => false,
-        //             "status"       => true
-        //         ]
-        //     ]
-        // ],
-        // "message"       => "Операция выполнена",
-        // "notifications" => [
-        //     "count_new"   => 3,
-        //     "count_total" => 12
-        // ],
-        // "pagination"    => [
-        //     "total_records" => 0,
-        //     "max_page"      => 1,
-        //     "cur_page"      => 1,
-        //     "per_page"      => 100
-        // ]
-        // ]
-        );
+        $current_user = auth()->user();
+        // получаем данные по компании по данным пользователя
+        $company_location_id = $current_user['company_location_id'];
+
+        $ttt = $this->get_animals_list_from_different_list_guid_svr($request, $company_location_id);
+
+        $data = [
+            'status' => true,
+            'message' => 'Операция выполнена',
+            'response_resource_data' => $ttt,
+            'user_id' => $current_user['user_id'],
+            'response_resource_dictionary' => false,
+            'pagination' => [
+                'total_records' => 1,
+                'cur_page' => 1,
+                'per_page' => 1
+            ],
+        ];
+        dd($data);
+        // return SvrApiResponseResource::make($data);
 
     }
+
+
+    /**
+     * Получить локацию компании для выборки по животным
+     *
+     * @return false|mixed
+     */
+    private function get_animals_list_from_different_list_guid_svr($data, $company_location_id)
+    {
+
+        $result = [];                                                        // конечный результат
+        $list_application_animal = [
+            'added' => 'Добавлено в систему СВР',                                // добавили в систему. животное из СЕЛЭКС попало в СВР'
+            'in_application' => 'Добавлено в заявку',                                    // 'добавили в заявку. животное добавили в заявку, но заявка пока в статусе "Создана"',
+            'sent' => 'Отправлено на регистрацию',                            // 'отправили на регистрацию. заявку перевели в статус "Сформирована" и затем отправили в Хорриот.
+            'registered' => 'Животное зарегистрировано. Присвоен guid из Хорриот',    //'зарегистрировали. получили ответ от Хорриот, все ок, и животное имеет номер.',
+            'rejected' => 'Отказ в регистрации',                                    //'отказ. по какой-то причине отказали, вет. врач или система Хорриот.',
+        ];
+
+
+        // Подзапрос для получения последнего application_id для каждого animal_id с использованием ROW_NUMBER()
+        $subQuery = DB::table(DataApplicationsAnimals::getTableName() . ' as t_application_animal_temp')
+            ->select('animal_id') // Выбираем animal_id
+            ->selectRaw('application_id') // Выбираем application_id
+            ->selectRaw('ROW_NUMBER() OVER (PARTITION BY animal_id ORDER BY application_id DESC) as rn') // Используем ROW_NUMBER() для нумерации строк в порядке убывания application_id для каждого animal_id
+            ->toSql(); // Преобразуем запрос в строку SQL
+
+        // Основной запрос
+        $list_animals = DB::table(DataAnimals::getTableName() . ' as t_animal')
+            ->select(
+                't_animal.*', // Выбираем все поля из таблицы t_animal
+                't_application_animal.application_animal_status' // Выбираем поле application_animal_status из таблицы t_application_animal
+            )
+            ->leftJoin(DB::raw("($subQuery) as t_application_animal_temp"), function ($join) {
+                $join->on('t_application_animal_temp.animal_id', '=', 't_animal.animal_id') // Соединяем по animal_id
+                ->where('t_application_animal_temp.rn', '=', 1); // Фильтруем, чтобы получить только строки с rn = 1 (последние application_id для каждого animal_id)
+            })
+            ->leftJoin(DataApplicationsAnimals::getTableName() . ' as t_application_animal', function ($join) {
+                $join->on('t_application_animal.animal_id', '=', 't_animal.animal_id') // Соединяем по animal_id
+                ->on('t_application_animal.application_id', '=', 't_application_animal_temp.application_id'); // Соединяем по application_id, чтобы получить соответствующие записи из t_application_animal
+            })
+            ->where('t_animal.company_location_id', '=', $company_location_id) // Фильтруем по company_location_id
+            ->whereIn('t_animal.animal_guid_self', $data['list_animals_guid_svr']) // Фильтруем по массиву list_animals_guid_svr
+            ->get() // Выполняем запрос и получаем результаты
+            ->keyBy('animal_guid_self'); // Устанавливаем ключи массива результатов по полю animal_guid_self
+
+        // dd($list_animals);
+
+
+
+        foreach ($data['list_animals_guid_svr'] as $guid_svr) {
+            if (!isset($list_animals[$guid_svr])) {
+                $result[$guid_svr] = [
+                    'guid_svr' => $guid_svr,
+                    'guid_horriot' => null,
+                    'number_horriot' => null,
+                    'message' => 'Животное не найдено',
+                ];
+
+                continue;
+            }
+
+            $animal_data = (array)$list_animals[$guid_svr];
+
+            $animal_message = match ($animal_data['application_animal_status']) {
+                'added', 'in_application', 'sent', 'registered', 'rejected' => $list_application_animal[$animal_data['application_animal_status']],
+                default => 'Животное еще не добавлено в заявку',
+            };
+            // dd($animal_message);
+            $result[$guid_svr] = [
+                'guid_svr' => $guid_svr,
+                'guid_horriot' => (!empty($animal_data['animal_guid_horriot'])) ? $animal_data['animal_guid_horriot'] : null,
+                'number_horriot' => (!empty($animal_data['animal_number_horriot'])) ? $animal_data['animal_number_horriot'] : null,
+                'message' => $animal_message,
+            ];
+        }
+
+        return $result;
+    }
+
 
     /**
      * Переключаем пользователя на работу с указанным хозяйством

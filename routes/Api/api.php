@@ -22,7 +22,7 @@ Route::prefix(config('svr.api_prefix'))->group(function () {
     ]);
 
     /** Получение данных из СВР со стороны модуля обмена */
-    Route::post('selex/check_animals', [ApiSelexController::class, 'selexCheckAnimals'])->middleware([
+    Route::post('selex/get_animals', [ApiSelexController::class, 'selexGetAnimals'])->middleware([
        'auth:svr_api',
        'api'
     ]);
