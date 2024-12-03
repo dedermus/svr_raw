@@ -28,6 +28,8 @@ use Svr\Data\Models\DataUsersParticipations;
 use Svr\Raw\Models\FromSelexBeef;
 use Svr\Raw\Models\FromSelexMilk;
 use Svr\Raw\Models\FromSelexSheep;
+use Svr\Raw\Resources\SelexGetAnimalsCollection;
+use Svr\Raw\Resources\SelexLoginResource;
 use Svr\Raw\Resources\SelexSendAnimalsCollection;
 use Svr\Raw\Resources\SelexSendAnimalsResource;
 use Symfony\Component\Mailer\Exception\InvalidArgumentException;
@@ -37,8 +39,9 @@ class ApiSelexController extends Controller
 {
     /**
      * Авторизация
+     * @throws AuthenticationException
      */
-    public function selexLogin(Request $request): JsonResponse
+    public function selexLogin(Request $request): SvrApiResponseResource
     {
 
         // НАЧАЛО валидация данных запроса
@@ -69,9 +72,8 @@ class ApiSelexController extends Controller
             // return response()->json(['error' => 'Неправильный логин или пароль'], 401);
         }
 
-        // // Создаём токен пользователю
+        // Создаём токен пользователю
         $new_token = $current_user->createToken('auth_token')->plainTextToken;
-
 
         // Создали запись в таблице токенов
         $token_data = (new SystemUsersToken())->userTokenStore([
@@ -124,9 +126,24 @@ class ApiSelexController extends Controller
         // $valid_data = new Request($valid_data);
 
         // переключаем пользователя на работу с указанным хозяйством
-        $result = $this->setUsersParticipations($current_user['user_id'], $token_data['token_id'], $participation_item_id, SystemParticipationsTypesEnum::COMPANY);
+        $this->setUsersParticipations($current_user['user_id'], $token_data['token_id'], $participation_item_id, SystemParticipationsTypesEnum::COMPANY);
 
-        return response()->json(['data' => ['user_token' => $new_token]], 200);
+        $data = collect([
+            'status' => true,
+            'user_token' => $new_token,
+            'message' => 'Операция выполнена',
+            'user_id' => $current_user['user_id'],
+            'response_resource_data' => SelexLoginResource::class,
+            'response_resource_dictionary' => false,
+            'pagination' => [
+                'total_records' => 1,
+                'cur_page' => 1,
+                'per_page' => 1
+            ],
+        ]);
+
+        return new SvrApiResponseResource($data);
+        // return response()->json(['data' => ['user_token' => $new_token]], 200);
     }
 
     /**
@@ -201,7 +218,6 @@ class ApiSelexController extends Controller
         ]);
 
         return new SvrApiResponseResource($data);
-
     }
 
 
@@ -233,119 +249,112 @@ class ApiSelexController extends Controller
         ];
         // результат обработки по каждому из переданных животных
         $result_animals = [];
-        // флаг обработки животных
-        $result = false;
+
         // список животных
-        $list_animals = (isset($data['animals'])) ? $data['animals'] : false;
-        // TODO? Думаю нужно убрать, т.к. $table_name обязательный параметр на входе метода. animals проверяется в validate_structure_request
-        if ($list_animals && $table_name) {
+        $list_animals = $data['animals'];
 
-            // получаем список животных из БД СВР
-            $nanimals_list = array_column($list_animals, 'NANIMAL_TIME');
-            $nanimals_data = DB::table($table_name)
-                ->select(
-                    'GUID_SVR',
-                    'NANIMAL',
-                    'NANIMAL_TIME'
-                )
-                ->where('NHOZ', '=', $data['main']['base_index'])
-                ->where('NANIMAL_TIME', '!=', '')
-                ->whereNotNull('NANIMAL_TIME')
-                ->whereIn('NANIMAL_TIME', $nanimals_list)
-                // Сортировка нужна для корректной работы метода distinct
-                // https://postgrespro.ru/docs/postgrespro/9.5/sql-select#SQL-DISTINCT
-                ->orderBy('NANIMAL_TIME')
-                ->orderBy('raw_from_selex_milk_id', 'desc')
-                ->distinct('NANIMAL_TIME')
-                ->get()
-                // используем keyBy для преобразования коллекции в хешь-таблицу
-                ->keyBy('NANIMAL_TIME');
+        // получаем список животных из БД СВР
+        $nanimals_list = array_column($list_animals, 'NANIMAL_TIME');
+        $nanimals_data = DB::table($table_name)
+            ->select(
+                'GUID_SVR',
+                'NANIMAL',
+                'NANIMAL_TIME'
+            )
+            ->where('NHOZ', '=', $data['main']['base_index'])
+            ->where('NANIMAL_TIME', '!=', '')
+            ->whereNotNull('NANIMAL_TIME')
+            ->whereIn('NANIMAL_TIME', $nanimals_list)
+            // Сортировка нужна для корректной работы метода distinct
+            // https://postgrespro.ru/docs/postgrespro/9.5/sql-select#SQL-DISTINCT
+            ->orderBy('NANIMAL_TIME')
+            ->orderBy('raw_from_selex_milk_id', 'desc')
+            ->distinct('NANIMAL_TIME')
+            ->get()
+            // используем keyBy для преобразования коллекции в хешь-таблицу
+            ->keyBy('NANIMAL_TIME');
 
-            // Преобразуем коллекцию $nanimals_data которая содержит объекты stdClass в массивы
-            $nanimals_data = $nanimals_data->map(function ($item) {
-                return (array)$item;
-            });
+        // Преобразуем коллекцию $nanimals_data которая содержит объекты stdClass в массивы
+        $nanimals_data = $nanimals_data->map(function ($item) {
+            return (array)$item;
+        });
 
-            foreach ($list_animals as $animal) {
+        foreach ($list_animals as $animal) {
 
-                if (isset($nanimals_data[$animal['NANIMAL_TIME']])) {
-                    $result_animals [] = SelexSendAnimalsResource::make(
-                        [
-                            'nanimal' => $nanimals_data[$animal['NANIMAL_TIME']]['NANIMAL'] ?? null,
-                            'nanimal_time' => $nanimals_data[$animal['NANIMAL_TIME']]['NANIMAL_TIME'] ?? null,
-                            'guid_svr' => $nanimals_data[$animal['NANIMAL_TIME']]['GUID_SVR'] ?? null,
-                            'status' => true,
-                            'double' => true
-                        ]
-                    );
-                    continue;
-                }
-
-                $guid_svr = (isset($animal['GUID_SVR'])) ? $animal['GUID_SVR'] : false;
-
-                if (empty($guid_svr)) {
-                    // уберем все значения с NULL
-                    $temp_animal = [];
-
-                    foreach ($animal as $key => $n) {
-                        if (!empty(trim($n))) {
-                            $temp_animal[$key] = $n;
-                        }
-                    }
-
-                    $animal = $temp_animal;
-
-                    // Генерация GUID v4 'UUID4'
-                    $animal['GUID_SVR'] = Uuid::v4()->toString();
-
-                    // форматируем даты. Переводим формат даты с разделителем '-'. Формат 'Y-m-d'
-                    foreach ($list_date_field as $date_field) {
-                        if (isset($animal[$date_field])) {
-                            $animal[$date_field] = strtotime($animal[$date_field]) ? date('Y-m-d', strtotime($animal[$date_field])) : null;
-                        }
-                    }
-
-                    // формируем JSONB для поля ANIMALS_JSON
-                    $animal['ANIMALS_JSON'] = json_encode(array_change_key_case($animal), JSON_UNESCAPED_UNICODE);
-
-                    // Модель в зависимости от номера task
-                    if ($table_name === FromSelexMilk::getTableName()) {
-                        $table = new FromSelexMilk;
-                    } elseif ($table_name === FromSelexBeef::getTableName()) {
-                        $table = new FromSelexBeef;
-                    } elseif ($table_name === FromSelexSheep::getTableName()) {
-                        $table = new FromSelexSheep;
-                    }
-
-                    // добавляем животное в таблицу
-                    $table->createRaw($animal);
-
-                    $result_animals [] = SelexSendAnimalsResource::make(
-                        [
-                            'nanimal' => $animal['NANIMAL'] ?? null,
-                            'nanimal_time' => $animal['NANIMAL_TIME'] ?? null,
-                            'guid_svr' => $animal['GUID_SVR'] ?? null,
-                            'status' => true,
-                            'double' => false
-                        ]
-                    );
-
-                } else {
-
-                    $result_animals [] = SelexSendAnimalsResource::make(
-                        [
-                            'nanimal' => $animal['NANIMAL'] ?? null,
-                            'nanimal_time' => $animal['NANIMAL_TIME'] ?? null,
-                            'guid_svr' => $animal['GUID_SVR'] ?? null,
-                            'status' => false,
-                            'double' => false
-                        ]
-                    );
-                }
+            if (isset($nanimals_data[$animal['NANIMAL_TIME']])) {
+                $result_animals [] = SelexSendAnimalsResource::make(
+                    [
+                        'nanimal' => $nanimals_data[$animal['NANIMAL_TIME']]['NANIMAL'] ?? null,
+                        'nanimal_time' => $nanimals_data[$animal['NANIMAL_TIME']]['NANIMAL_TIME'] ?? null,
+                        'guid_svr' => $nanimals_data[$animal['NANIMAL_TIME']]['GUID_SVR'] ?? null,
+                        'status' => true,
+                        'double' => true
+                    ]
+                );
+                continue;
             }
-        } else {
-            throw new Exception(message: 'Переданные данные по животным не сохранены',
-                code: 500);
+
+            $guid_svr = (isset($animal['GUID_SVR'])) ? $animal['GUID_SVR'] : false;
+
+            if (empty($guid_svr)) {
+                // уберем все значения с NULL
+                $temp_animal = [];
+
+                foreach ($animal as $key => $n) {
+                    if (!empty(trim($n))) {
+                        $temp_animal[$key] = $n;
+                    }
+                }
+
+                $animal = $temp_animal;
+
+                // Генерация GUID v4 'UUID4'
+                $animal['GUID_SVR'] = Uuid::v4()->toString();
+
+                // форматируем даты. Переводим формат даты с разделителем '-'. Формат 'Y-m-d'
+                foreach ($list_date_field as $date_field) {
+                    if (isset($animal[$date_field])) {
+                        $animal[$date_field] = strtotime($animal[$date_field]) ? date('Y-m-d', strtotime($animal[$date_field])) : null;
+                    }
+                }
+
+                // формируем JSONB для поля ANIMALS_JSON
+                $animal['ANIMALS_JSON'] = json_encode(array_change_key_case($animal), JSON_UNESCAPED_UNICODE);
+
+                // Модель в зависимости от номера task
+                if ($table_name === FromSelexMilk::getTableName()) {
+                    $table = new FromSelexMilk;
+                } elseif ($table_name === FromSelexBeef::getTableName()) {
+                    $table = new FromSelexBeef;
+                } elseif ($table_name === FromSelexSheep::getTableName()) {
+                    $table = new FromSelexSheep;
+                }
+
+                // добавляем животное в таблицу
+                $table->createRaw($animal);
+
+                $result_animals [] = SelexSendAnimalsResource::make(
+                    [
+                        'nanimal' => $animal['NANIMAL'] ?? null,
+                        'nanimal_time' => $animal['NANIMAL_TIME'] ?? null,
+                        'guid_svr' => $animal['GUID_SVR'] ?? null,
+                        'status' => true,
+                        'double' => false
+                    ]
+                );
+
+            } else {
+
+                $result_animals [] = SelexSendAnimalsResource::make(
+                    [
+                        'nanimal' => $animal['NANIMAL'] ?? null,
+                        'nanimal_time' => $animal['NANIMAL_TIME'] ?? null,
+                        'guid_svr' => $animal['GUID_SVR'] ?? null,
+                        'status' => false,
+                        'double' => false
+                    ]
+                );
+            }
         }
         return $result_animals;
     }
@@ -388,15 +397,12 @@ class ApiSelexController extends Controller
         ]);
 
         $current_user = auth()->user();
-        // получаем данные по компании по данным пользователя
-        $company_location_id = $current_user['company_location_id'];
-
-        $ttt = $this->get_animals_list_from_different_list_guid_svr($request, $company_location_id);
 
         $data = [
             'status' => true,
             'message' => 'Операция выполнена',
-            'response_resource_data' => $ttt,
+            'result_animals' => $this->get_animals_list_from_different_list_guid_svr($request, $current_user['company_location_id']),
+            'response_resource_data' => SelexGetAnimalsCollection::class,
             'user_id' => $current_user['user_id'],
             'response_resource_dictionary' => false,
             'pagination' => [
@@ -405,42 +411,42 @@ class ApiSelexController extends Controller
                 'per_page' => 1
             ],
         ];
-        dd($data);
-        // return SvrApiResponseResource::make($data);
 
+        return SvrApiResponseResource::make($data);
     }
 
 
     /**
-     * Получить локацию компании для выборки по животным
+     * Получить животных из СВР по guid_svr и company_location_id
      *
-     * @return false|mixed
+     * @param Request $data
+     * @param int $company_location_id
+     * @return array
      */
-    private function get_animals_list_from_different_list_guid_svr($data, $company_location_id)
+    private function get_animals_list_from_different_list_guid_svr(Request $data, int $company_location_id): array
     {
-
-        $result = [];                                                        // конечный результат
+        $result = [];                                                                   // конечный результат
         $list_application_animal = [
-            'added' => 'Добавлено в систему СВР',                                // добавили в систему. животное из СЕЛЭКС попало в СВР'
-            'in_application' => 'Добавлено в заявку',                                    // 'добавили в заявку. животное добавили в заявку, но заявка пока в статусе "Создана"',
-            'sent' => 'Отправлено на регистрацию',                            // 'отправили на регистрацию. заявку перевели в статус "Сформирована" и затем отправили в Хорриот.
-            'registered' => 'Животное зарегистрировано. Присвоен guid из Хорриот',    //'зарегистрировали. получили ответ от Хорриот, все ок, и животное имеет номер.',
-            'rejected' => 'Отказ в регистрации',                                    //'отказ. по какой-то причине отказали, вет. врач или система Хорриот.',
+            'added' => 'Добавлено в систему СВР',                                       // добавили в систему. животное из СЕЛЭКС попало в СВР
+            'in_application' => 'Добавлено в заявку',                                   // добавили в заявку. животное добавили в заявку, но заявка пока в статусе "Создана",
+            'sent' => 'Отправлено на регистрацию',                                      // отправили на регистрацию. заявку перевели в статус "Сформирована" и затем отправили в Хорриот.
+            'registered' => 'Животное зарегистрировано. Присвоен guid из Хорриот',      // зарегистрировали. получили ответ от Хорриот, все ок, и животное имеет номер,
+            'rejected' => 'Отказ в регистрации',                                        // отказ. по какой-то причине отказали, вет. врач или система Хорриот
         ];
 
 
         // Подзапрос для получения последнего application_id для каждого animal_id с использованием ROW_NUMBER()
         $subQuery = DB::table(DataApplicationsAnimals::getTableName() . ' as t_application_animal_temp')
-            ->select('animal_id') // Выбираем animal_id
-            ->selectRaw('application_id') // Выбираем application_id
+            ->select('animal_id')
+            ->selectRaw('application_id')
             ->selectRaw('ROW_NUMBER() OVER (PARTITION BY animal_id ORDER BY application_id DESC) as rn') // Используем ROW_NUMBER() для нумерации строк в порядке убывания application_id для каждого animal_id
             ->toSql(); // Преобразуем запрос в строку SQL
 
         // Основной запрос
         $list_animals = DB::table(DataAnimals::getTableName() . ' as t_animal')
             ->select(
-                't_animal.*', // Выбираем все поля из таблицы t_animal
-                't_application_animal.application_animal_status' // Выбираем поле application_animal_status из таблицы t_application_animal
+                't_animal.*',
+                't_application_animal.application_animal_status'
             )
             ->leftJoin(DB::raw("($subQuery) as t_application_animal_temp"), function ($join) {
                 $join->on('t_application_animal_temp.animal_id', '=', 't_animal.animal_id') // Соединяем по animal_id
@@ -450,54 +456,47 @@ class ApiSelexController extends Controller
                 $join->on('t_application_animal.animal_id', '=', 't_animal.animal_id') // Соединяем по animal_id
                 ->on('t_application_animal.application_id', '=', 't_application_animal_temp.application_id'); // Соединяем по application_id, чтобы получить соответствующие записи из t_application_animal
             })
-            ->where('t_animal.company_location_id', '=', $company_location_id) // Фильтруем по company_location_id
-            ->whereIn('t_animal.animal_guid_self', $data['list_animals_guid_svr']) // Фильтруем по массиву list_animals_guid_svr
-            ->get() // Выполняем запрос и получаем результаты
-            ->keyBy('animal_guid_self'); // Устанавливаем ключи массива результатов по полю animal_guid_self
-
-        // dd($list_animals);
-
-
+            ->where('t_animal.company_location_id', '=', $company_location_id)      // Фильтруем по company_location_id
+            ->whereIn('t_animal.animal_guid_self', $data['list_animals_guid_svr'])          // Фильтруем по массиву list_animals_guid_svr
+            ->get()
+            ->keyBy('animal_guid_self'); // Результат превращаем в хешь-таблицу по полю animal_guid_self.
 
         foreach ($data['list_animals_guid_svr'] as $guid_svr) {
             if (!isset($list_animals[$guid_svr])) {
-                $result[$guid_svr] = [
+                $result[] = [
                     'guid_svr' => $guid_svr,
                     'guid_horriot' => null,
                     'number_horriot' => null,
                     'message' => 'Животное не найдено',
                 ];
-
                 continue;
             }
-
             $animal_data = (array)$list_animals[$guid_svr];
-
             $animal_message = match ($animal_data['application_animal_status']) {
                 'added', 'in_application', 'sent', 'registered', 'rejected' => $list_application_animal[$animal_data['application_animal_status']],
                 default => 'Животное еще не добавлено в заявку',
             };
             // dd($animal_message);
-            $result[$guid_svr] = [
+            $result[] = [
                 'guid_svr' => $guid_svr,
                 'guid_horriot' => (!empty($animal_data['animal_guid_horriot'])) ? $animal_data['animal_guid_horriot'] : null,
                 'number_horriot' => (!empty($animal_data['animal_number_horriot'])) ? $animal_data['animal_number_horriot'] : null,
                 'message' => $animal_message,
             ];
         }
-
         return $result;
     }
-
 
     /**
      * Переключаем пользователя на работу с указанным хозяйством
      * @param int $user_id
-     * @param int $token
+     * @param int $token_id
      * @param int $participation_item_id
      * @param SystemParticipationsTypesEnum $participation_type
+     * @return array
+     * @throws Exception
      */
-    private function setUsersParticipations(int $user_id, int $token_id, int $participation_item_id, SystemParticipationsTypesEnum $participation_type)
+    private function setUsersParticipations(int $user_id, int $token_id, int $participation_item_id, SystemParticipationsTypesEnum $participation_type): array
     {
         $user_participation_data = collect(DataUsersParticipations::where([
             ['user_id', '=', $user_id],
@@ -512,11 +511,6 @@ class ApiSelexController extends Controller
                         'participation_id' => $user_participation_data['participation_id']
                     ]
                 );
-
-
-            // $this->response_message('Привязка успешно установлена');
-
-            // $user_data_extend = $this->user_data_extend(['user_id' => $user_id]);
 
             $company_location_id = false;
             $region_id = false;
@@ -536,11 +530,6 @@ class ApiSelexController extends Controller
                 }
             }
 
-            // $this->response_dictionary('user_companies_list', module_Users::widgets_list_user_companies($user_data_extend['user_companies_list'], 'simple', $company_location_id));
-            // $this->response_dictionary('user_companies_locations_list', module_Users::widgets_list_user_company_location($user_data_extend['user_companies_locations_list'], 'simple', $company_location_id));
-            // $this->response_dictionary('user_roles_list', module_Users::widgets_list_user_roles($user_data_extend['user_roles_list'], 'simple', $user_participation_data['role_id']));
-            // $this->response_dictionary('user_districts_list', module_Users::widgets_list_user_districts($user_data_extend['user_districts_list'], 'simple', $district_id));
-            // $this->response_dictionary('user_regions_list', module_Users::widgets_list_user_regions($user_data_extend['user_regions_list'], 'simple', $region_id));
             return [
                 'company_location_id' => $company_location_id,
                 'region_id' => $region_id,
@@ -551,23 +540,15 @@ class ApiSelexController extends Controller
         }
     }
 
-
-    public function user_participation_data(int $user_id, int $participation_item_id, SystemParticipationsTypesEnum $participation_item_type)
-    {
-        return DB::table(DataUsersParticipations::getTableName())->where('user_id', $user_id)
-            ->where('participation_item_id', $participation_item_id)
-            ->where('participation_item_type', $participation_item_type->value)
-            ->first();
-    }
-
-
     /**
+     * Достанем роль пользователя
+     *
      * @param integer $user_id
      * @param string $role_slug
      *
      * @return Collection
      */
-    private function user_role_data($user_id, $role_slug): Collection
+    private function user_role_data(int $user_id, string $role_slug): Collection
     {
         $result = collect(DB::table(SystemUsersRoles::getTableName()
             . ' as ur')
@@ -606,6 +587,7 @@ class ApiSelexController extends Controller
      * и получение его ссылочного ключа company_location_id
      *
      * @param Collection $current_user - данные текущего пользователя
+     * @throws AuthenticationException
      */
     private function check_base_index_from_user(Collection $current_user)
     {
@@ -614,13 +596,12 @@ class ApiSelexController extends Controller
             ? $current_user['user_base_index']
             : false;
 
-
         // подготовим для перебора необходимую область (ключ) из справочника (список подключенных хозяйств)
         $user_companies_locations_list
             = DataUsersParticipations::userCompaniesLocationsList($current_user['user_id'])
             ->all();
-        // получаем данные о компании по ее базовому индексу
 
+        // получаем данные о компании по ее базовому индексу
         $company_data = $this->company_data(false, false,
             $company_base_index);
         if ($company_data === false || $company_data->isEmpty()) {
@@ -772,6 +753,4 @@ class ApiSelexController extends Controller
                 return false;
         }
     }
-
-
 }

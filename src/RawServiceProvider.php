@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\ServiceProvider;
 use Svr\Raw\Console\RunRawTests;
-use Svr\Raw\Exceptions\ExceptionHandler;
-use Svr\Raw\Middleware\ApiValidationErrors;
 
 class RawServiceProvider extends ServiceProvider
 {

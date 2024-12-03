@@ -14,8 +14,7 @@
         "classmap": [
             "src/",
             "tests",
-            "tests/TestCase.php",
-            "src/Exceptions"
+            "tests/TestCase.php"
         ],
         "psr-4": {
             "Svr\\Raw\\": "src/",
@@ -23,7 +22,6 @@
             "Svr\\Raw\\Seeders\\": "database/seeders/",
             "Svr\\Raw\\Tests\\": "tests/",
             "Svr\\Raw\\Tests\\Unit\\": "tests/Unit/",
-            "Svr\\Raw\\Exceptions\\": "src/Exceptions/",
             "Svr\\Raw\\Resources\\": "src/Resources/"
         }
     },
