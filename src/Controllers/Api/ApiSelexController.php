@@ -250,7 +250,10 @@ class ApiSelexController extends Controller
                 ->where('NANIMAL_TIME', '!=', '')
                 ->whereNotNull('NANIMAL_TIME')
                 ->whereIn('NANIMAL_TIME', $nanimals_list)
-                /** distinct('NANIMAL_TIME'), чтобы выбрать только первую запись для каждого уникального значения NANIMAL_TIME. */
+                // Сортировка нужна для корректной работы метода distinct
+                // https://postgrespro.ru/docs/postgrespro/9.5/sql-select#SQL-DISTINCT
+                ->orderBy('NANIMAL_TIME')
+                ->orderBy('raw_from_selex_milk_id', 'desc')
                 ->distinct('NANIMAL_TIME')
                 ->get()
                 // используем keyBy для преобразования коллекции в хешь-таблицу
