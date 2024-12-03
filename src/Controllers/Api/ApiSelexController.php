@@ -67,43 +67,14 @@ class ApiSelexController extends Controller
             // return response()->json(['error' => 'Неправильный логин или пароль'], 401);
         }
 
-        // Создаём токен пользователю
+        // // Создаём токен пользователю
         $new_token = $current_user->createToken('auth_token')->plainTextToken;
 
-        // Последний токен пользователя
-        $last_token
-            = SystemUsersToken::userLastTokenData($current_user->user_id);
-
-        if ($last_token) {
-            // $last_token = $last_token->toArray();
-            /** @var int|null $participation_id */
-            $participation_id = $last_token->participation_id ?? null;
-        } else {
-            // получаем связку пользователя с хозяйствами/регионами/районами
-            $participation_last = DataUsersParticipations::where(
-                [
-                    ['user_id', '=', $current_user['user_id']],
-                    [
-                        'participation_status', '=',
-                        SystemStatusEnum::ENABLED->value
-                    ]
-                ]
-            )
-                ->latest('updated_at')
-                ->first();
-            // если привязка есть
-            if (!is_null($participation_last)) {
-                $participation_id = $participation_last['participation_id'];
-            } else {
-                throw new AuthenticationException('Пользователь не привязан ни к одному хозяйству/району/региону');
-                // return response()->json(['error' => 'Пользователь не привязан ни к одному хозяйству/району/региону'], 401);
-            }
-        }
 
         // Создали запись в таблице токенов
-        (new SystemUsersToken())->userTokenStore([
+        $token_data = (new SystemUsersToken())->userTokenStore([
             'user_id' => $current_user['user_id'],
-            'participation_id' => $participation_id,
+            'participation_id' => null,
             'token_value' => $new_token,
             'token_client_ip' => $request->ip()
         ]);
@@ -128,7 +99,7 @@ class ApiSelexController extends Controller
         // добавляем в контейнер данных из переданного запроса новые поля и значения
         $data['participation_item_id'] = $participation_item_id;
         // тип участника - компания
-        $data['participation_item_type'] = 'company';
+        $data['participation_item_type'] = SystemParticipationsTypesEnum::COMPANY->value;
 
         // валидация данных
         $model_data_users_participations = new DataUsersParticipations();
@@ -143,16 +114,17 @@ class ApiSelexController extends Controller
         // - переопределяем ключи и правила
         $rules['participation_item_id'] = "required|"
             . $rules['participation_item_id'];
+
         // - Валидируем
-        $valid_data = Validator::make($data, $rules, $messages)->validate();
+        Validator::make($data, $rules, $messages)->validate();
 
         // преобразуем $valid_data в объект Request
         // $valid_data = new Request($valid_data);
 
         // переключаем пользователя на работу с указанным хозяйством
-        $res = $this->setUsersParticipations($current_user['user_id'], $new_token, $participation_item_id, SystemParticipationsTypesEnum::COMPANY);
+        $result = $this->setUsersParticipations($current_user['user_id'], $token_data['token_id'], $participation_item_id, SystemParticipationsTypesEnum::COMPANY);
 
-        return response()->json(['test' => 'test'], 200);
+        return response()->json(['data' => ['user_token' => $new_token]], 200);
     }
 
     /**
@@ -212,6 +184,7 @@ class ApiSelexController extends Controller
         $result_animals = $this->add_animals($request, $table_name);
 
         $data = collect([
+
             'status' => true,
             'result_animals' => $result_animals,
             'message' => 'Операция выполнена',
@@ -268,17 +241,20 @@ class ApiSelexController extends Controller
             // получаем список животных из БД СВР
             $nanimals_list = array_column($list_animals, 'NANIMAL_TIME');
             $nanimals_data = DB::table($table_name)
-                ->select('GUID_SVR', 'NANIMAL', 'NANIMAL_TIME')
-                ->where(
-                    [
-                        ['NHOZ', '=', $data['main']['base_index']],
-                        ['NANIMAL_TIME', '!=', ''],
-                        ['NANIMAL_TIME', '!=', null]
-                    ]
+                ->select(
+                    'GUID_SVR',
+                    'NANIMAL',
+                    'NANIMAL_TIME'
                 )
-                ->whereIn('NANIMAL_TIME', $nanimals_list)->get();
-
-            $nanimals_data = collect($nanimals_data)->keyBy('NANIMAL_TIME');
+                ->where('NHOZ', '=', $data['main']['base_index'])
+                ->where('NANIMAL_TIME', '!=', '')
+                ->whereNotNull('NANIMAL_TIME')
+                ->whereIn('NANIMAL_TIME', $nanimals_list)
+                /** distinct('NANIMAL_TIME'), чтобы выбрать только первую запись для каждого уникального значения NANIMAL_TIME. */
+                ->distinct('NANIMAL_TIME')
+                ->get()
+                // используем keyBy для преобразования коллекции в хешь-таблицу
+                ->keyBy('NANIMAL_TIME');
 
             // Преобразуем коллекцию $nanimals_data которая содержит объекты stdClass в массивы
             $nanimals_data = $nanimals_data->map(function ($item) {
@@ -286,7 +262,6 @@ class ApiSelexController extends Controller
             });
 
             foreach ($list_animals as $animal) {
-                // $animal = array_change_key_case($animal);
 
                 if (isset($nanimals_data[$animal['NANIMAL_TIME']])) {
                     $result_animals [] = SelexSendAnimalsResource::make(
@@ -453,81 +428,58 @@ class ApiSelexController extends Controller
      */
     private function setUsersParticipations(int $user_id, int $token_id, int $participation_item_id, SystemParticipationsTypesEnum $participation_type)
     {
+        $user_participation_data = collect(DataUsersParticipations::where([
+            ['user_id', '=', $user_id],
+            ['participation_item_id', '=', $participation_item_id],
+            ['participation_item_type', '=', $participation_type->value]
+        ])->first());
 
-        // # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-        if ($participation_type == SystemParticipationsTypesEnum::ADMIN) {
-            // Проверим, назначена ли пользователю роль администратора
-            $role_data = $this->user_role_data($user_id, $participation_type->value);
-            if ($role_data->isEmpty()) {
-                throw new AuthenticationException('У пользователя отсутствует роль администратора');
-            }
-
-            // $this->set_admin();
-
-            $participation_data = DataUsersParticipations::where([
-                ['user_id' . '=' . $user_id],
-                ['participation_item_type' . '=' . SystemParticipationsTypesEnum::ADMIN->value]
-            ])->first();
-
-            if ($participation_data) {
-                $participation_id = $participation_item_id;
-            } else {
-                $participation_id = DataUsersParticipations::create([
-                    'user_id' => $user_id,
-                    'participation_item_type' => SystemParticipationsTypesEnum::ADMIN->value,
-                    'role_id' => 1
-                ])->participation_id;
-            }
-
-
-            // $this->update(DB_MAIN, SCHEMA_SYSTEM.'.'.TBL_USERS_TOKENS,
-            //     ['participation_id' => $participation_id],
-            //     ['token_id' => $this->USER('token_id')]);
-
-            //  END  #   set admin
-
-
-        } else {
-            $user_participation_data = collect($this->user_participation_data($user_id, $participation_item_id, $participation_type));
-
-            if ($user_participation_data->isNotEmpty()) {
-                $res = SystemUsersToken::where('token_id', $token_id)->update(['participation_id' => $user_participation_data['participation_id']])->returning('token_id');
-                $this->update(
-                    DB_MAIN, SCHEMA_SYSTEM . '.' . TBL_USERS_TOKENS,
-                    ['participation_id' => $user_participation_data['participation_id']],   // это данные на обновление???
-                    ['token_id' => $token_id]                                               // это условие where для поиска строки которую будем обновлять?
+        if ($user_participation_data->isNotEmpty()) {
+            SystemUsersToken::where('token_id', $token_id)
+                ->update(
+                    [
+                        'participation_id' => $user_participation_data['participation_id']
+                    ]
                 );
 
-                $this->response_message('Привязка успешно установлена');
 
-                $user_data_extend = $this->user_data_extend(['user_id' => $user_id]);
+            // $this->response_message('Привязка успешно установлена');
 
-                $company_location_id = false;
-                $region_id = false;
-                $district_id = false;
+            // $user_data_extend = $this->user_data_extend(['user_id' => $user_id]);
 
-                if (!empty($user_participation_data['participation_item_type'])) {
-                    switch ($user_participation_data['participation_item_type']) {
-                        case SystemParticipationsTypesEnum::COMPANY->value:
-                            $company_location_id = $user_participation_data['participation_item_id'];
-                            break;
-                        case SystemParticipationsTypesEnum::REGION->value:
-                            $region_id = $user_participation_data['participation_item_id'];
-                            break;
-                        case SystemParticipationsTypesEnum::DISTRICT->value:
-                            $district_id = $user_participation_data['participation_item_id'];
-                            break;
-                    }
+            $company_location_id = false;
+            $region_id = false;
+            $district_id = false;
+
+            if (!empty($user_participation_data['participation_item_type'])) {
+                switch ($user_participation_data['participation_item_type']) {
+                    case SystemParticipationsTypesEnum::COMPANY->value:
+                        $company_location_id = $user_participation_data['participation_item_id'];
+                        break;
+                    case SystemParticipationsTypesEnum::REGION->value:
+                        $region_id = $user_participation_data['participation_item_id'];
+                        break;
+                    case SystemParticipationsTypesEnum::DISTRICT->value:
+                        $district_id = $user_participation_data['participation_item_id'];
+                        break;
                 }
-
-                $this->response_dictionary('user_companies_locations_list', module_Users::widgets_list_user_company_location($user_data_extend['user_companies_locations_list'], 'simple', $company_location_id));
-                $this->response_dictionary('user_roles_list', module_Users::widgets_list_user_roles($user_data_extend['user_roles_list'], 'simple', $user_participation_data['role_id']));
-                $this->response_dictionary('user_districts_list', module_Users::widgets_list_user_districts($user_data_extend['user_districts_list'], 'simple', $district_id));
-                $this->response_dictionary('user_regions_list', module_Users::widgets_list_user_regions($user_data_extend['user_regions_list'], 'simple', $region_id));
             }
+
+            // $this->response_dictionary('user_companies_list', module_Users::widgets_list_user_companies($user_data_extend['user_companies_list'], 'simple', $company_location_id));
+            // $this->response_dictionary('user_companies_locations_list', module_Users::widgets_list_user_company_location($user_data_extend['user_companies_locations_list'], 'simple', $company_location_id));
+            // $this->response_dictionary('user_roles_list', module_Users::widgets_list_user_roles($user_data_extend['user_roles_list'], 'simple', $user_participation_data['role_id']));
+            // $this->response_dictionary('user_districts_list', module_Users::widgets_list_user_districts($user_data_extend['user_districts_list'], 'simple', $district_id));
+            // $this->response_dictionary('user_regions_list', module_Users::widgets_list_user_regions($user_data_extend['user_regions_list'], 'simple', $region_id));
+            return [
+                'company_location_id' => $company_location_id,
+                'region_id' => $region_id,
+                'district_id' => $district_id,
+            ];
+        } else {
+            throw new Exception(message: 'Привязка пользователя на хозяйство не найдена', code: 404);
         }
     }
+
 
     public function user_participation_data(int $user_id, int $participation_item_id, SystemParticipationsTypesEnum $participation_item_type)
     {
