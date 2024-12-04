@@ -122,9 +122,6 @@ class ApiSelexController extends Controller
         // - Валидируем
         Validator::make($data, $rules, $messages)->validate();
 
-        // преобразуем $valid_data в объект Request
-        // $valid_data = new Request($valid_data);
-
         // переключаем пользователя на работу с указанным хозяйством
         $this->setUsersParticipations($current_user['user_id'], $token_data['token_id'], $participation_item_id, SystemParticipationsTypesEnum::COMPANY);
 
@@ -143,7 +140,6 @@ class ApiSelexController extends Controller
         ]);
 
         return new SvrApiResponseResource($data);
-        // return response()->json(['data' => ['user_token' => $new_token]], 200);
     }
 
     /**
@@ -433,7 +429,6 @@ class ApiSelexController extends Controller
             'registered' => 'Животное зарегистрировано. Присвоен guid из Хорриот',      // зарегистрировали. получили ответ от Хорриот, все ок, и животное имеет номер,
             'rejected' => 'Отказ в регистрации',                                        // отказ. по какой-то причине отказали, вет. врач или система Хорриот
         ];
-
 
         // Подзапрос для получения последнего application_id для каждого animal_id с использованием ROW_NUMBER()
         $subQuery = DB::table(DataApplicationsAnimals::getTableName() . ' as t_application_animal_temp')
