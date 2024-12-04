@@ -107,11 +107,11 @@ class FromSelexMilkController extends AdminController
         // link to documentation https://open-admin.org/docs/en/model-grid-column#list-order-order-by
         $grid->model()->orderBy($grid->getKeyName(), 'desc');
         foreach ($this->all_columns as $column_name) {
-            $value_label = strtoupper($column_name);
-            $trans = trans(strtolower($this->trans . $column_name));
+            $value_label = $column_name;
+            $trans = trans($this->trans . $column_name);
             match ($column_name) {
-                // Индивидуальные настройки для отображения колонок:created_at, update_at, raw_from_selex_milk_id
-                $grid->getKeyName() => $grid->column($column_name, 'ID')
+                // Индивидуальные настройки для отображения колонок:created_at, updated_at, raw_from_selex_milk_id
+                $grid->getKeyName() => $grid->column($column_name, 'id')
                     ->help($trans)->sortable(),
 
                 $this->model_obj->getCreatedAtColumn(), $this->model_obj->getUpdatedAtColumn() => $grid
@@ -151,9 +151,9 @@ class FromSelexMilkController extends AdminController
         $show = new Show($this->model::findOrFail($id));
         foreach ($this->all_columns as $column_name) {
             $value_label = $column_name;
-            $trans = trans(strtolower($this->trans . $column_name));
+            $trans = trans($this->trans . $column_name);
             match ($column_name) {
-                // Индивидуальные настройки для отображения полей:created_at, update_at, raw_from_selex_beef_id
+                // Индивидуальные настройки для отображения полей:created_at, updated_at, raw_from_selex_beef_id
                 $this->model_obj->getCreatedAtColumn(), $this->model_obj->getUpdatedAtColumn() => $show
                     ->field($column_name, $value_label)
                     ->xx_datetime(),
@@ -184,107 +184,107 @@ class FromSelexMilkController extends AdminController
         $model = $this->model_obj;
         $form = new Form($this->model_obj);
         $form->display($form->model()->getKeyName(), trans($this->trans . $form->model()->getKeyName()));
-        $form->number('NANIMAL', __('NANIMAL'))
+        $form->number('nanimal', __('nanimal'))
             ->help(trans($this->trans . 'nanimal'));
-        $form->text('NANIMAL_TIME', __('NANIMAL_TIME'))
+        $form->text('nanimal_time', __('nanimal_time'))
             ->help(trans($this->trans . 'nanimal_time'));
-        $form->text('NINV', __('NINV'))
+        $form->text('ninv', __('ninv'))
             ->help(trans($this->trans . 'ninv'));
-        $form->text('KLICHKA', __('KLICHKA'))
+        $form->text('klichka', __('klichka'))
             ->help(trans($this->trans . 'klichka'));
-        $form->text('POL', __('POL'))
+        $form->text('pol', __('pol'))
             ->help(trans($this->trans . 'pol'));
-        $form->number('NPOL', __('NPOL'))
+        $form->number('npol', __('npol'))
             ->help(trans($this->trans . 'npol'));
-        $form->text('NGOSREGISTER', __('NGOSREGISTER'))
+        $form->text('ngosregister', __('ngosregister'))
             ->help(trans($this->trans . 'ngosregister'));
-        $form->text('NINV1', __('NINV1'))
+        $form->text('ninv1', __('ninv1'))
             ->help(trans($this->trans . 'ninv1'));
-        $form->text('NINV3', __('NINV3'))
+        $form->text('ninv3', __('ninv3'))
             ->help(trans($this->trans . 'ninv3'));
-        $form->text('ANIMAL_VID', __('ANIMAL_VID'))
+        $form->text('animal_vid', __('animal_vid'))
             ->help(trans($this->trans . 'animal_vid'));
-        $form->select('ANIMAL_VID_COD', __('ANIMAL_VID_COD'))
+        $form->select('animal_vid_cod', __('animal_vid_cod'))
             ->options([
                 26 => 'Код 26 - селекс-овцы',
                 17 => 'Код 17 - селекс-мясо',
             ])
             ->default(17)
             ->help(trans($this->trans . 'animal_vid_cod'));
-        $form->text('MAST', __('MAST'))
+        $form->text('mast', __('mast'))
             ->help(trans($this->trans . 'mast'));
-        $form->number('NMAST', __('NMAST'))
+        $form->number('nmast', __('nmast'))
             ->help(trans($this->trans . 'nmast'));
-        $form->text('POR', __('POR'))
+        $form->text('por', __('por'))
             ->help(trans($this->trans . 'por'));
-        $form->number('NPOR', __('NPOR'))
+        $form->number('npor', __('npor'))
             ->help(trans($this->trans . 'npor'));
-        $form->date('DATE_ROGD', __('DATE_ROGD'))
+        $form->date('date_rogd', __('date_rogd'))
             ->help(trans($this->trans . 'date_rogd'));
-        $form->date('DATE_POSTUPLN', __('DATE_POSTUPLN'))
+        $form->date('date_postupln', __('date_postupln'))
             ->help(trans($this->trans . 'date_postupln'));
-        $form->number('NHOZ_ROGD', __('NHOZ_ROGD'))
+        $form->number('nhoz_rogd', __('nhoz_rogd'))
             ->help(trans($this->trans . 'nhoz_rogd'));
-        $form->number('NHOZ', __('NHOZ'))
+        $form->number('nhoz', __('nhoz'))
             ->help(trans($this->trans . 'nhoz'));
-        $form->number('NOBL', __('NOBL'))
+        $form->number('nobl', __('nobl'))
             ->help(trans($this->trans . 'nobl'));
-        $form->number('NRN', __('NRN'))
+        $form->number('nrn', __('nrn'))
             ->help(trans($this->trans . 'nrn'));
-        $form->text('NIDENT', __('NIDENT'))
+        $form->text('nident', __('nident'))
             ->help(trans($this->trans . 'nident'));
-        $form->text('ROGD_HOZ', __('ROGD_HOZ'))
+        $form->text('rogd_hoz', __('rogd_hoz'))
             ->help(trans($this->trans . 'rogd_hoz'));
-        $form->date('DATE_V', __('DATE_V'))
+        $form->date('date_v', __('date_v'))
             ->help(trans($this->trans . 'date_v'));
-        $form->text('PV', __('PV'))
+        $form->text('pv', __('pv'))
             ->help(trans($this->trans . 'pv'));
-        $form->text('RASHOD', __('RASHOD'))
+        $form->text('rashod', __('rashod'))
             ->help(trans($this->trans . 'rashod'));
-        $form->number('GM_V', __('GM_V'))
+        $form->number('gm_v', __('gm_v'))
             ->help(trans($this->trans . 'gm_v'));
-        $form->text('ISP', __('ISP'))
+        $form->text('isp', __('isp'))
             ->help(trans($this->trans . 'isp'));
-        $form->date('DATE_CHIP', __('DATE_CHIP'))
+        $form->date('date_chip', __('date_chip'))
             ->help(trans($this->trans . 'date_chip'));
-        $form->date('DATE_NINV', __('DATE_NINV'))
+        $form->date('date_ninv', __('date_ninv'))
             ->help(trans($this->trans . 'date_ninv'));
-        $form->date('DATE_NGOSREGISTER', __('DATE_NGOSREGISTER'))
+        $form->date('date_ngosregister', __('date_ngosregister'))
             ->help(trans($this->trans . 'date_ngosregister'));
-        $form->text('NINV_OTCA', __('NINV_OTCA'))
+        $form->text('ninv_otca', __('ninv_otca'))
             ->help(trans($this->trans . 'ninv_otca'));
-        $form->text('NGOSREGISTER_OTCA', __('NGOSREGISTER_OTCA'))
+        $form->text('ngosregister_otca', __('ngosregister_otca'))
             ->help(trans($this->trans . 'ngosregister_otca'));
-        $form->text('POR_OTCA', __('POR_OTCA'))
+        $form->text('por_otca', __('por_otca'))
             ->help(trans($this->trans . 'por_otca'));
-        $form->number('NPOR_OTCA', __('NPOR_OTCA'))
+        $form->number('npor_otca', __('npor_otca'))
             ->help(trans($this->trans . 'npor_otca'));
-        $form->date('DATE_ROGD_OTCA', __('DATE_ROGD_OTCA'))
+        $form->date('date_rogd_otca', __('date_rogd_otca'))
             ->help(trans($this->trans . 'date_rogd_otca'));
-        $form->text('NINV_MATERI', __('NINV_MATERI'))
+        $form->text('ninv_materi', __('ninv_materi'))
             ->help(trans($this->trans . 'ninv_materi'));
-        $form->text('NGOSREGISTER_MATERI', __('NGOSREGISTER_MATERI'))
+        $form->text('ngosregister_materi', __('ngosregister_materi'))
             ->help(trans($this->trans . 'ngosregister_materi'));
-        $form->text('POR_MATERI', __('POR_MATERI'))
+        $form->text('por_materi', __('por_materi'))
             ->help(trans($this->trans . 'por_materi'));
-        $form->number('NPOR_MATERI', __('NPOR_MATERI'))
+        $form->number('npor_materi', __('npor_materi'))
             ->help(trans($this->trans . 'npor_materi'));
-        $form->date('DATE_ROGD_MATERI', __('DATE_ROGD_MATERI'))
+        $form->date('date_rogd_materi', __('date_rogd_materi'))
             ->help(trans($this->trans . 'date_rogd_materi'));
-        $form->select('IMPORT_STATUS', __('IMPORT_STATUS'))
+        $form->select('import_status', __('import_status'))
             ->options(ImportStatusEnum::get_option_list())
             ->help(trans($this->trans . 'import_status'))
             ->required()
             ->default('new');
-        $form->number('TASK', __('TASK'))
+        $form->number('task', __('task'))
             ->help(trans($this->trans . 'task'));
-        $form->text('GUID_SVR', __('GUID_SVR'))
+        $form->text('guid_svr', __('guid_svr'))
             ->help(trans($this->trans . 'guid_svr'));
-        $form->textarea('ANIMALS_JSON', __('ANIMALS_JSON'))
+        $form->textarea('animals_json', __('animals_json'))
             ->help(trans($this->trans . 'animals_json'));
         $form->display('created_at', __('created_at'))
             ->help(trans('svr-core-lang::svr.created_at'));
-        $form->display('update_at', __('update_at'))
+        $form->display('updated_at', __('updated_at'))
             ->help(trans('svr-core-lang::svr.updated_at'));
         // Отключить "Продолжить создание"
         $form->disableCreatingCheck();

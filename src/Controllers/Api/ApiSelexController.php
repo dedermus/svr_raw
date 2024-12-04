@@ -2,9 +2,6 @@
 
 namespace Svr\Raw\Controllers\Api;
 
-use Exception;
-use Illuminate\Auth\AuthenticationException;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Collection;
@@ -15,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Svr\Core\Enums\SystemParticipationsTypesEnum;
 use Svr\Core\Enums\SystemStatusDeleteEnum;
 use Svr\Core\Enums\SystemStatusEnum;
+use Svr\Core\Exceptions\CustomException;
 use Svr\Core\Models\SystemRoles;
 use Svr\Core\Models\SystemUsers;
 use Svr\Core\Models\SystemUsersRoles;
@@ -32,14 +30,13 @@ use Svr\Raw\Resources\SelexGetAnimalsCollection;
 use Svr\Raw\Resources\SelexLoginResource;
 use Svr\Raw\Resources\SelexSendAnimalsCollection;
 use Svr\Raw\Resources\SelexSendAnimalsResource;
-use Symfony\Component\Mailer\Exception\InvalidArgumentException;
 use Symfony\Component\Uid\Uuid;
 
 class ApiSelexController extends Controller
 {
     /**
      * Авторизация
-     * @throws AuthenticationException
+     * @throws CustomException
      */
     public function selexLogin(Request $request): SvrApiResponseResource
     {
@@ -68,7 +65,7 @@ class ApiSelexController extends Controller
         // Если пользователь не найден
         if (is_null($current_user)) { // TODO переписать на нормальный структурированный вид после того как сделаем нормальный конструктор вывода
             // вызваем ошибку авторизации (неправильный логин или пароль) Exception
-            throw new AuthenticationException('Пользователь не найден. Неправильный логин или пароль');
+            throw new CustomException('Пользователь не найден. Неправильный логин или пароль');
             // return response()->json(['error' => 'Неправильный логин или пароль'], 401);
         }
 
@@ -87,8 +84,8 @@ class ApiSelexController extends Controller
         /** @var Collection $role_data */
         $role_data = $this->user_role_data($current_user['user_id'], 'doctor_company');
         if ($role_data->isEmpty()) {
-            throw new InvalidArgumentException('У пользователя отсутствует роль "Ветеринарный врач хозяйства"',
-                401);
+            throw new CustomException('У пользователя отсутствует роль "Ветеринарный врач хозяйства"',
+                404);
         }
         // Проверка наличия у пользователя в списке переданного хозяйства и получение его ссылочного ключа company_location_id
         // ссылочный ключ на хозяйства, который назначен хозяйству
@@ -96,8 +93,8 @@ class ApiSelexController extends Controller
             = $this->check_base_index_from_user(collect($current_user));
 
         if ($participation_item_id === false) {
-            throw new InvalidArgumentException('Пользователь не привязан к указанному хозяйству',
-                401);
+            throw new CustomException('Пользователь не привязан к указанному хозяйству',
+                404);
         }
 
         // добавляем в контейнер данных из переданного запроса новые поля и значения
@@ -158,10 +155,13 @@ class ApiSelexController extends Controller
         // получаем базовый индекс из входящих данных (Request)
         $base_index = $request['main']['base_index'];
 
+        // понижаем все ключи секции animals в нижнем регистре в $request
+        $request['animals'] = $this->recursiveLowercaseKeys($request['animals']);
+
         // сравниваем базовые индексы: полученные из $company_id пользователя и переданные из секции MAIN
         if ((string)$base_index !== (string)$company_base_index) {
-            throw new InvalidArgumentException('Переданный базовый индекс в секции MAIN не сопоставлен с Токеном',
-                401);
+            throw new CustomException('Переданный базовый индекс в секции MAIN не сопоставлен с Токеном',
+                404);
         }
 
         /** @var array $exclude_fields - список полей, которые не входят в список обязательных полей для анализа */
@@ -169,10 +169,10 @@ class ApiSelexController extends Controller
             'raw_from_selex_milk_id',   // инкремент молочных коров КРС
             'raw_from_selex_beef_id',   // инкремент мясных коров КРС
             'raw_from_selex_sheep_id',  // инкремент овец МРС
-            'ANIMALS_JSON',             // сырые данные из Селекс
-            'IMPORT_STATUS',            // ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)
+            'animals_json',             // сырые данные из Селекс
+            'import_status',            // ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)
             'created_at',               // Дата и время создания
-            'update_at',                // Дата и время модификации
+            'updated_at',                // Дата и время модификации
             'TASK',                     // код задачи берется из таблицы TASKS.NTASK (1 – молоко / 6- мясо / 4 - овцы)
             'status',                   // статус обработки записи
         ];
@@ -184,7 +184,7 @@ class ApiSelexController extends Controller
         $table_columns = Schema::getColumns($table_name);
         if (empty($table_columns)) {
             // Не определена таблица для записи животных
-            throw new InvalidArgumentException('Таблица ' . $table_name . ' не существует',
+            throw new CustomException('Таблица ' . $table_name . ' не существует',
                 500);
         }
 
@@ -232,16 +232,16 @@ class ApiSelexController extends Controller
         }
 
         $list_date_field = [
-            'DATE_ROGD',
-            'DATE_POSTUPLN',
-            'DATE_V',
-            'DATE_CHIP',
-            'DATE_NINV',
-            'DATE_NGOSREGISTER',
-            'DATE_ROGD_MATERI',
-            'DATE_ROGD_OTCA',
-            'DATE_NINVRIGHT',
-            'DATE_NINVLEFT'
+            'date_rogd',
+            'date_postupln',
+            'date_v',
+            'date_chip',
+            'date_ninv',
+            'date_ngosregister',
+            'date_rogd_materi',
+            'date_rogd_otca',
+            'date_ninvright',
+            'date_ninvleft'
         ];
         // результат обработки по каждому из переданных животных
         $result_animals = [];
@@ -250,25 +250,25 @@ class ApiSelexController extends Controller
         $list_animals = $data['animals'];
 
         // получаем список животных из БД СВР
-        $nanimals_list = array_column($list_animals, 'NANIMAL_TIME');
+        $nanimals_list = array_column($list_animals, 'nanimal_time');
         $nanimals_data = DB::table($table_name)
             ->select(
-                'GUID_SVR',
-                'NANIMAL',
-                'NANIMAL_TIME'
+                'guid_svr',
+                'nanimal',
+                'nanimal_time'
             )
-            ->where('NHOZ', '=', $data['main']['base_index'])
-            ->where('NANIMAL_TIME', '!=', '')
-            ->whereNotNull('NANIMAL_TIME')
-            ->whereIn('NANIMAL_TIME', $nanimals_list)
+            ->where('nhoz', '=', $data['main']['base_index'])
+            ->where('nanimal_time', '!=', '')
+            ->whereNotNull('nanimal_time')
+            ->whereIn('nanimal_time', $nanimals_list)
             // Сортировка нужна для корректной работы метода distinct
             // https://postgrespro.ru/docs/postgrespro/9.5/sql-select#SQL-DISTINCT
-            ->orderBy('NANIMAL_TIME')
+            ->orderBy('nanimal_time')
             ->orderBy('raw_from_selex_milk_id', 'desc')
-            ->distinct('NANIMAL_TIME')
+            ->distinct('nanimal_time')
             ->get()
             // используем keyBy для преобразования коллекции в хешь-таблицу
-            ->keyBy('NANIMAL_TIME');
+            ->keyBy('nanimal_time');
 
         // Преобразуем коллекцию $nanimals_data которая содержит объекты stdClass в массивы
         $nanimals_data = $nanimals_data->map(function ($item) {
@@ -277,12 +277,12 @@ class ApiSelexController extends Controller
 
         foreach ($list_animals as $animal) {
 
-            if (isset($nanimals_data[$animal['NANIMAL_TIME']])) {
+            if (isset($nanimals_data[$animal['nanimal_time']])) {
                 $result_animals [] = SelexSendAnimalsResource::make(
                     [
-                        'nanimal' => $nanimals_data[$animal['NANIMAL_TIME']]['NANIMAL'] ?? null,
-                        'nanimal_time' => $nanimals_data[$animal['NANIMAL_TIME']]['NANIMAL_TIME'] ?? null,
-                        'guid_svr' => $nanimals_data[$animal['NANIMAL_TIME']]['GUID_SVR'] ?? null,
+                        'nanimal' => $nanimals_data[$animal['nanimal_time']]['nanimal'] ?? null,
+                        'nanimal_time' => $nanimals_data[$animal['nanimal_time']]['nanimal_time'] ?? null,
+                        'guid_svr' => $nanimals_data[$animal['nanimal_time']]['guid_svr'] ?? null,
                         'status' => true,
                         'double' => true
                     ]
@@ -290,7 +290,7 @@ class ApiSelexController extends Controller
                 continue;
             }
 
-            $guid_svr = (isset($animal['GUID_SVR'])) ? $animal['GUID_SVR'] : false;
+            $guid_svr = (isset($animal['guid_svr'])) ? $animal['guid_svr'] : false;
 
             if (empty($guid_svr)) {
                 // уберем все значения с NULL
@@ -305,7 +305,7 @@ class ApiSelexController extends Controller
                 $animal = $temp_animal;
 
                 // Генерация GUID v4 'UUID4'
-                $animal['GUID_SVR'] = Uuid::v4()->toString();
+                $animal['guid_svr'] = Uuid::v4()->toString();
 
                 // форматируем даты. Переводим формат даты с разделителем '-'. Формат 'Y-m-d'
                 foreach ($list_date_field as $date_field) {
@@ -315,7 +315,7 @@ class ApiSelexController extends Controller
                 }
 
                 // формируем JSONB для поля ANIMALS_JSON
-                $animal['ANIMALS_JSON'] = json_encode(array_change_key_case($animal), JSON_UNESCAPED_UNICODE);
+                $animal['animals_json'] = json_encode(array_change_key_case($animal), JSON_UNESCAPED_UNICODE);
 
                 // Модель в зависимости от номера task
                 if ($table_name === FromSelexMilk::getTableName()) {
@@ -331,9 +331,9 @@ class ApiSelexController extends Controller
 
                 $result_animals [] = SelexSendAnimalsResource::make(
                     [
-                        'nanimal' => $animal['NANIMAL'] ?? null,
-                        'nanimal_time' => $animal['NANIMAL_TIME'] ?? null,
-                        'guid_svr' => $animal['GUID_SVR'] ?? null,
+                        'nanimal' => $animal['nanimal'] ?? null,
+                        'nanimal_time' => $animal['nanimal_time'] ?? null,
+                        'guid_svr' => $animal['guid_svr'] ?? null,
                         'status' => true,
                         'double' => false
                     ]
@@ -343,9 +343,9 @@ class ApiSelexController extends Controller
 
                 $result_animals [] = SelexSendAnimalsResource::make(
                     [
-                        'nanimal' => $animal['NANIMAL'] ?? null,
-                        'nanimal_time' => $animal['NANIMAL_TIME'] ?? null,
-                        'guid_svr' => $animal['GUID_SVR'] ?? null,
+                        'nanimal' => $animal['nanimal'] ?? null,
+                        'nanimal_time' => $animal['nanimal_time'] ?? null,
+                        'guid_svr' => $animal['guid_svr'] ?? null,
                         'status' => false,
                         'double' => false
                     ]
@@ -489,7 +489,7 @@ class ApiSelexController extends Controller
      * @param int $participation_item_id
      * @param SystemParticipationsTypesEnum $participation_type
      * @return array
-     * @throws Exception
+     * @throws CustomException
      */
     private function setUsersParticipations(int $user_id, int $token_id, int $participation_item_id, SystemParticipationsTypesEnum $participation_type): array
     {
@@ -531,7 +531,7 @@ class ApiSelexController extends Controller
                 'district_id' => $district_id,
             ];
         } else {
-            throw new Exception(message: 'Привязка пользователя на хозяйство не найдена', code: 404);
+            throw new CustomException(message: 'Привязка пользователя на хозяйство не найдена', code: 404);
         }
     }
 
@@ -582,7 +582,7 @@ class ApiSelexController extends Controller
      * и получение его ссылочного ключа company_location_id
      *
      * @param Collection $current_user - данные текущего пользователя
-     * @throws AuthenticationException
+     * @throws CustomException
      */
     private function check_base_index_from_user(Collection $current_user)
     {
@@ -600,7 +600,7 @@ class ApiSelexController extends Controller
         $company_data = $this->company_data(false, false,
             $company_base_index);
         if ($company_data === false || $company_data->isEmpty()) {
-            throw new AuthenticationException('Не найдены компании по базовому индексу хозяйства');
+            throw new CustomException('Не найдены компании по базовому индексу хозяйства', 200);
         }
         $company_id = (isset($company_data['company_id']))
             ? $company_data['company_id'] : false;
@@ -619,7 +619,7 @@ class ApiSelexController extends Controller
 
         // если пользователю не назначено хозяйство или не найдено
         if ($company_location_id === false) {
-            throw new AuthenticationException('Переданный базовый индекс хозяйства не привязан к учетной записи пользователя.');
+            throw new CustomException('Переданный базовый индекс хозяйства не привязан к учетной записи пользователя.', 200);
         }
 
         // возвращаем флаг проверки
@@ -709,12 +709,12 @@ class ApiSelexController extends Controller
     {
         // Валидация данных
         Validator::make(
-            data: $request->all(),
+            data: $request->toArray(),
             rules: [
                 'main.base_index' => 'required|numeric',
                 'main.task' => ['present', 'numeric', 'in:1,4,6'],
                 'animals' => 'present',
-                // проверка полей в секции ANIMALS
+                // проверка полей в секции animals
                 ...$rules
             ],
             messages: [
@@ -747,5 +747,30 @@ class ApiSelexController extends Controller
             default:
                 return false;
         }
+    }
+
+    /** Рекурсивно преобразовать ключи в нижний регистр.
+     * Независимо от уровня вложенности
+     *
+     * @param mixed $data
+     * @return array
+     */
+    private function recursiveLowercaseKeys($data): mixed
+    {
+        if ($data instanceof Request) {
+            $data = $data->all();
+        }
+
+        if (is_array($data)) {
+            return array_map(function ($item) {
+                return $this->recursiveLowercaseKeys($item);
+            }, (array)array_change_key_case($data));
+        }
+
+        if ($data instanceof Collection) {
+            return $this->recursiveLowercaseKeys($data->all());
+        }
+
+        return $data;
     }
 }

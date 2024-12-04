@@ -5,95 +5,95 @@ use Svr\Core\Enums\ImportStatusEnum;
 return [
     [
         //животное - уникальный идентификатор
-        'NANIMAL' => null,
+        'nanimal' => null,
         //животное - уникальный идентификатор (наверное...)
-        'NANIMAL_TIME' => null,
+        'nanimal_time' => null,
         //животное - инвентарный номер
-        'NINV' => null,
+        'ninv' => null,
         //животное - кличка
-        'KLICHKA' => null,
+        'klichka' => null,
         //животное - пол
-        'POL' => null,
+        'pol' => null,
         //животное - код пола
-        'NPOL' => null,
-        //животное - идентификационный номер РСХН
-        'NGOSREGISTER' => null,
+        'npol' => null,
+        //животное - идентификационный номер рсхн
+        'ngosregister' => null,
         //животное - номер в оборудовании
-        'NINV1' => null,
+        'ninv1' => null,
         //животное - электронная метка
-        'NINV3' => null,
+        'ninv3' => null,
         //животное - вид животного
-        'ANIMAL_VID' => null,
-        //животное - код вида животного (КРС - 26 / Овцы - 17)
-        'ANIMAL_VID_COD' => null,
+        'animal_vid' => null,
+        //животное - код вида животного (крс - 26 / овцы - 17)
+        'animal_vid_cod' => null,
         //животное - масть
-        'MAST' => null,
+        'mast' => null,
         //животное - код масти
-        'NMAST' => null,
+        'nmast' => null,
         //животное - порода
-        'POR' => null,
+        'por' => null,
         //животное - код породы
-        'NPOR' => null,
-        //животное - дата рождения в формате YYYY-mm-dd
-        'DATE_ROGD' => null,
-        //животное - дата поступления в формате YYYY-mm-dd
-        'DATE_POSTUPLN' => null,
+        'npor' => null,
+        //животное - дата рождения в формате yyyy-mm-dd
+        'date_rogd' => null,
+        //животное - дата поступления в формате yyyy-mm-dd
+        'date_postupln' => null,
         //животное - хозяйство рождения (базовый индекс хозяйства)
-        'NHOZ_ROGD' => null,
+        'nhoz_rogd' => null,
         //животное - базовый индекс хозяйства (текущее хозяйство)
-        'NHOZ' => null,
+        'nhoz' => null,
         //животное - внутренний код области хозяйства (текущее хозяйство)
-        'NOBL' => null,
+        'nobl' => null,
         //животное - внутренний код района хозяйства (текущее хозяйство)
-        'NRN' => null,
+        'nrn' => null,
         //животное - импортный идентификатор
-        'NIDENT' => null,
+        'nident' => null,
         //животное - хозяйство рождения (название)
-        'ROGD_HOZ' => null,
-        //животное - дата выбытия в формате YYYY-mm-dd
-        'DATE_V' => null,
+        'rogd_hoz' => null,
+        //животное - дата выбытия в формате yyyy-mm-dd
+        'date_v' => null,
         //животное - причина выбытия
-        'PV' => null,
+        'pv' => null,
         //животное - расход
-        'RASHOD' => null,
+        'rashod' => null,
         //животное - живая масса при выбытии (кг)
-        'GM_V' => null,
+        'gm_v' => null,
         //животное - использование (племенная ценность)
-        'ISP' => null,
-        //животное - дата электронного мечения в формате YYYY-mm-dd
-        'DATE_CHIP' => null,
-        //животное - дата мечения (инв. №) в формате YYYY-mm-dd
-        'DATE_NINV' => null,
-        //животное - дата мечения (№ РСХН) в формате YYYY-mm-dd
-        'DATE_NGOSREGISTER' => null,
+        'isp' => null,
+        //животное - дата электронного мечения в формате yyyy-mm-dd
+        'date_chip' => null,
+        //животное - дата мечения (инв. №) в формате yyyy-mm-dd
+        'date_ninv' => null,
+        //животное - дата мечения (№ рсхн) в формате yyyy-mm-dd
+        'date_ngosregister' => null,
         //отец - инвентарный номер
-        'NINV_OTCA' => null,
-        //отец - идентификационный номер РСХН
-        'NGOSREGISTER_OTCA' => null,
+        'ninv_otca' => null,
+        //отец - идентификационный номер рсхн
+        'ngosregister_otca' => null,
         //отец - порода
-        'POR_OTCA' => null,
+        'por_otca' => null,
         //отец - код породы
-        'NPOR_OTCA' => null,
-        //отец - дата рождения в формате YYYY-mm-dd
-        'DATE_ROGD_OTCA' => null,
+        'npor_otca' => null,
+        //отец - дата рождения в формате yyyy-mm-dd
+        'date_rogd_otca' => null,
         //мать - инвентарный номер
-        'NINV_MATERI' => null,
-        //мать - идентификационный номер РСХН
-        'NGOSREGISTER_MATERI' => null,
+        'ninv_materi' => null,
+        //мать - идентификационный номер рсхн
+        'ngosregister_materi' => null,
         //мать - порода
-        'POR_MATERI' => null,
+        'por_materi' => null,
         //мать - код породы
-        'NPOR_MATERI' => null,
-        //мать - дата рождения в формате YYYY-mm-dd
-        'DATE_ROGD_MATERI' => null,
+        'npor_materi' => null,
+        //мать - дата рождения в формате yyyy-mm-dd
+        'date_rogd_materi' => null,
         //ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)
-        'IMPORT_STATUS' => ImportStatusEnum::COMPLETED->value,
+        'import_status' => ImportStatusEnum::COMPLETED->value,
         //код задачи берется из таблицы TASKS.NTASK (1 – молоко / 6- мясо / 4 - овцы')
-        'TASK' => null,
+        'task' => null,
         //гуид животного, который генерирует СВР в момент создания этой записи
-        'GUID_SVR' => null,
+        'guid_svr' => null,
         //сырые данные из Селекс в формате JSON.
-        'ANIMALS_JSON' => null,
+        'animals_json' => null,
     ]
 
 ];

@@ -12,7 +12,7 @@ use Svr\Raw\Controllers\Api\ApiSelexController;
 
 Route::prefix(config('svr.api_prefix'))->group(function () {
 
-    /** Авторизация */
+    /** Авторизация. Публичный метод */
     Route::post('selex/login', [ApiSelexController::class, 'selexLogin']);
 
     /** Передача данных в СВР со стороны модуля обмена */

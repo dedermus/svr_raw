@@ -47,7 +47,7 @@ class FromSelexBeef extends Model
      * Поле даты обновления строки
      * @var string
      */
-    const UPDATED_AT = 'update_at';
+    const UPDATED_AT = 'updated_at';
 
 
     /**
@@ -59,7 +59,7 @@ class FromSelexBeef extends Model
 
     protected array $dates = [
         'created_at',
-        'update_at',
+        'updated_at',
     ];
 
     /**
@@ -116,53 +116,53 @@ class FromSelexBeef extends Model
      */
     protected $fillable = [
         'raw_from_selex_beef_id',       // Инкремент
-        'NANIMAL',                      // Животное - уникальный идентификатор
-        'NANIMAL_TIME',                 // Животное - уникальный идентификатор (наверное...)
-        'NINV',                         // Животное - инвентарный номер
-        'KLICHKA',                      // Животное - кличка
-        'POL',                          // Животное - пол
-        'NPOL',                         // Животное - код пола
-        'NGOSREGISTER',                 // Животное - идентификационный номер РСХН
-        'NINV1',                        // Животное - номер в оборудовании
-        'NINV3',                        // Животное - электронная метка
-        'ANIMAL_VID',                   // Животное - вид животного
-        'ANIMAL_VID_COD',               // Животное - код вида животного (КРС - 26 / Овцы - 17
-        'MAST',                         // Животное - масть
-        'NMAST',                        // Животное - код масти
-        'POR',                          // Животное - порода
-        'NPOR',                         // Животное - код породы
-        'DATE_ROGD',                    // Животное - дата рождения в формате YYYY.mm.dd
-        'DATE_POSTUPLN',                // Животное - дата поступления в формате YYYY.mm.dd
-        'NHOZ_ROGD',                    // Животное - хозяйство рождения (базовый индекс хозяйства)
-        'NHOZ',                         // Животное - базовый индекс хозяйства (текущее хозяйство)
-        'NOBL',                         // Животное - внутренний код области хозяйства (текущее хозяйство)
-        'NRN',                          // Животное - внутренний код района хозяйства (текущее хозяйство)
-        'NIDENT',                       // Животное - импортный идентификатор
-        'ROGD_HOZ',                     // Животное - хозяйство рождения (название)
-        'DATE_V',                       // Животное - дата выбытия
-        'PV',                           // Животное - причина выбытия
-        'RASHOD',                       // Животное - расход
-        'GM_V',                         // Животное - живая масса при выбытии (кг)
-        'ISP',                          // Животное - использование (племенная ценность)
-        'DATE_CHIP',                    // Животное - дата электронного мечения
-        'DATE_NINV',                    // Животное - дата мечения (инв. №)
-        'DATE_NGOSREGISTER',            // Животное - дата мечения (№ РСХН)
-        'NINV_OTCA',                    // Оотец - инвентарный номер
-        'NGOSREGISTER_OTCA',            // Оотец - идентификационный номер РСХН
-        'POR_OTCA',                     // Оотец - порода
-        'NPOR_OTCA',                    // Отец - код породы
-        'DATE_ROGD_OTCA',               // Отец - дата рождения
-        'NINV_MATERI',                  // Мать - инвентарный номер
-        'NGOSREGISTER_MATERI',          // Мать - идентификационный номер РСХН
-        'POR_MATERI',                   // Мать - порода
-        'NPOR_MATERI',                  // Мать - код породы
-        'DATE_ROGD_MATERI',             // Мать - дата рождения
-        'IMPORT_STATUS',                // ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)
-        'TASK',                         // Код задачи берется из таблицы TASKS.NTASK (1 – молоко / 6- мясо / 4 - овцы
-        'GUID_SVR',                     // Гуид животного, который генерирует СВР в момент создания этой записи
-        'ANIMALS_JSON',                 // Сырые данные из Селекс
+        'nanimal',                      // Животное - уникальный идентификатор
+        'nanimal_time',                 // Животное - уникальный идентификатор (наверное...)
+        'ninv',                         // Животное - инвентарный номер
+        'klichka',                      // Животное - кличка
+        'pol',                          // Животное - пол
+        'npol',                         // Животное - код пола
+        'ngosregister',                 // Животное - идентификационный номер РСХН
+        'ninv1',                        // Животное - номер в оборудовании
+        'ninv3',                        // Животное - электронная метка
+        'animal_vid',                   // Животное - вид животного
+        'animal_vid_cod',               // Животное - код вида животного (КРС - 26 / Овцы - 17
+        'mast',                         // Животное - масть
+        'nmast',                        // Животное - код масти
+        'por',                          // Животное - порода
+        'npor',                         // Животное - код породы
+        'date_rogd',                    // Животное - дата рождения в формате YYYY.mm.dd
+        'date_postupln',                // Животное - дата поступления в формате YYYY.mm.dd
+        'nhoz_rogd',                    // Животное - хозяйство рождения (базовый индекс хозяйства)
+        'nhoz',                         // Животное - базовый индекс хозяйства (текущее хозяйство)
+        'nobl',                         // Животное - внутренний код области хозяйства (текущее хозяйство)
+        'nrn',                          // Животное - внутренний код района хозяйства (текущее хозяйство)
+        'nident',                       // Животное - импортный идентификатор
+        'rogd_hoz',                     // Животное - хозяйство рождения (название)
+        'date_v',                       // Животное - дата выбытия
+        'pv',                           // Животное - причина выбытия
+        'rashod',                       // Животное - расход
+        'gm_v',                         // Животное - живая масса при выбытии (кг)
+        'isp',                          // Животное - использование (племенная ценность)
+        'date_chip',                    // Животное - дата электронного мечения
+        'date_ninv',                    // Животное - дата мечения (инв. №)
+        'date_ngosregister',            // Животное - дата мечения (№ РСХН)
+        'ninv_otca',                    // Оотец - инвентарный номер
+        'ngosregister_otca',            // Оотец - идентификационный номер РСХН
+        'por_otca',                     // Оотец - порода
+        'npor_otca',                    // Отец - код породы
+        'date_rogd_otca',               // Отец - дата рождения
+        'ninv_materi',                  // Мать - инвентарный номер
+        'ngosregister_materi',          // Мать - идентификационный номер РСХН
+        'por_materi',                   // Мать - порода
+        'npor_materi',                  // Мать - код породы
+        'date_rogd_materi',             // Мать - дата рождения
+        'import_status',                // ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)
+        'task',                         // Код задачи берется из таблицы TASKS.NTASK (1 – молоко / 6- мясо / 4 - овцы
+        'guid_svr',                     // Гуид животного, который генерирует СВР в момент создания этой записи
+        'animals_json',                 // Сырые данные из Селекс
         'created_at',                   // Дата создания записи
-        'update_at',                    // Дата удаления записи
+        'updated_at',                   // Дата удаления записи
     ];
 
 
@@ -196,53 +196,51 @@ class FromSelexBeef extends Model
                 $request->isMethod('put') ? 'required' : '',
                 Rule::exists('.' . $this->getTable(), $this->primaryKey),
             ],
-            $this->primaryKey => 'required|exists:.' . $this->getTable() . ',' . $this->primaryKey,
-            'NANIMAL' => 'integer|nullable',
-            'NANIMAL_TIME' => 'max:128|nullable',
-            'NINV' => 'max:15|nullable',
-            'KLICHKA' => 'max:50|nullable',
-            'POL' => 'max:30|nullable',
-            'NPOL' => 'integer|nullable',
-            'NGOSREGISTER' => 'max:50|nullable',
-            'NINV1' => 'max:15|nullable',
-            'NINV3' => 'max:20|nullable',
-            'ANIMAL_VID' => 'max:50|nullable',
-            'ANIMAL_VID_COD' => 'required|integer',
-            'MAST' => 'max:30|nullable',
-            'NMAST' => 'integer|nullable',
-            'POR' => 'max:30|nullable',
-            'NPOR' => 'integer|nullable',
-            'DATE_ROGD' => 'date|nullable',
-            'DATE_POSTUPLN' => 'date|nullable',
-            'NHOZ_ROGD' => 'integer|nullable',
-            'NHOZ' => 'integer|nullable',
-            'NOBL' => 'integer|nullable',
-            'NRN' => 'integer|nullable',
-            'NIDENT' => 'max:20|nullable',
-            'ROGD_HOZ' => 'max:50|nullable',
-            'DATE_V' => 'date|nullable',
-            'PV' => 'max:60|nullable',
-            'RASHOD' => 'max:30|nullable',
-            'GM_V' => 'integer|nullable',
-            'ISP' => 'max:20|nullable',
-            'DATE_CHIP' => 'date|nullable',
-            'DATE_NINV' => 'date|nullable',
-            'DATE_NGOSREGISTER' => 'date|nullable',
-            'NINV_OTCA' => 'max:15|nullable',
-            'NGOSREGISTER_OTCA' => 'max:50|nullable',
-            'POR_OTCA' => 'max:30|nullable',
-            'NPOR_OTCA' => 'integer|nullable',
-            'DATE_ROGD_OTCA' => 'date|nullable',
-            'NINV_MATERI' => 'max:15|nullable',
-            'NGOSREGISTER_MATERI' => 'max:50|nullable',
-            'POR_MATERI' => 'max:30|nullable',
-            'NPOR_MATERI' => 'integer|nullable',
-            'DATE_ROGD_MATERI' => 'date|nullable',
-            'IMPORT_STATUS' => ['nullable',
-                Rule::enum(ImportStatusEnum::class)],
-            'TASK' => 'integer|nullable',
-            'GUID_SVR' => 'max:64|nullable',
-            'ANIMALS_JSON' => 'json|nullable',
+            'nanimal'                     => 'integer|nullable',
+            'nanimal_time'                => 'max:128|nullable',
+            'ninv'                        => 'max:15|nullable',
+            'klichka'                     => 'max:50|nullable',
+            'pol'                         => 'max:30|nullable',
+            'npol'                        => 'integer|nullable',
+            'ngosregister'                => 'max:50|nullable',
+            'ninv1'                       => 'max:15|nullable',
+            'ninv3'                       => 'max:20|nullable',
+            'animal_vid'                  => 'max:50|nullable',
+            'animal_vid_cod'              => 'required|integer',
+            'mast'                        => 'max:30|nullable',
+            'nmast'                       => 'integer|nullable',
+            'por'                         => 'max:30|nullable',
+            'npor'                        => 'integer|nullable',
+            'date_rogd'                   => 'date|nullable',
+            'date_postupln'               => 'date|nullable',
+            'nhoz_rogd'                   => 'integer|nullable',
+            'nhoz'                        => 'integer|nullable',
+            'nobl'                        => 'integer|nullable',
+            'nrn'                         => 'integer|nullable',
+            'nident'                      => 'max:20|nullable',
+            'rogd_hoz'                    => 'max:50|nullable',
+            'date_v'                      => 'date|nullable',
+            'pv'                          => 'max:60|nullable',
+            'rashod'                      => 'max:30|nullable',
+            'gm_v'                        => 'integer|nullable',
+            'isp'                         => 'max:20|nullable',
+            'date_chip'                   => 'date|nullable',
+            'date_ninv'                   => 'date|nullable',
+            'date_ngosregister'           => 'date|nullable',
+            'ninv_otca'                   => 'max:15|nullable',
+            'ngosregister_otca'           => 'max:50|nullable',
+            'por_otca'                    => 'max:30|nullable',
+            'npor_otca'                   => 'integer|nullable',
+            'date_rogd_otca'              => 'date|nullable',
+            'ninv_materi'                 => 'max:15|nullable',
+            'ngosregister_materi'         => 'max:50|nullable',
+            'por_materi'                  => 'max:30|nullable',
+            'npor_materi'                 => 'integer|nullable',
+            'date_rogd_materi'            => 'date|nullable',
+            'import_status'               => ['nullable', Rule::enum(ImportStatusEnum::class)],
+            'task'                        => 'integer|nullable',
+            'guid_svr'                    => 'max:64|nullable',
+            'animals_json'                => 'json|nullable',
         ];
     }
 
@@ -256,51 +254,51 @@ class FromSelexBeef extends Model
             // Объединяем все сообщения об ошибках в один массив
             $this->primaryKey . '.required' => trans('svr-core-lang::validation.required'),
             $this->primaryKey . '.exists' => trans('svr-core-lang::validation.exists'),
-            'NANIMAL.integer' => trans('svr-core-lang::validation.integer'),
-            'NANIMAL_TIME' => trans('svr-core-lang::validation'),
-            'NINV' => trans('svr-core-lang::validation'),
-            'KLICHKA' => trans('svr-core-lang::validation'),
-            'POL' => trans('svr-core-lang::validation'),
-            'NPOL' => trans('svr-core-lang::validation'),
-            'NGOSREGISTER' => trans('svr-core-lang::validation'),
-            'NINV1' => trans('svr-core-lang::validation'),
-            'NINV3' => trans('svr-core-lang::validation'),
-            'ANIMAL_VID' => trans('svr-core-lang::validation'),
-            'ANIMAL_VID_COD' => trans('svr-core-lang::validation'),
-            'MAST' => trans('svr-core-lang::validation'),
-            'NMAST' => trans('svr-core-lang::validation'),
-            'POR' => trans('svr-core-lang::validation'),
-            'NPOR' => trans('svr-core-lang::validation'),
-            'DATE_ROGD' => trans('svr-core-lang::validation'),
-            'DATE_POSTUPLN' => trans('svr-core-lang::validation'),
-            'NHOZ_ROGD' => trans('svr-core-lang::validation'),
-            'NHOZ' => trans('svr-core-lang::validation'),
-            'NOBL' => trans('svr-core-lang::validation'),
-            'NRN' => trans('svr-core-lang::validation'),
-            'NIDENT' => trans('svr-core-lang::validation'),
-            'ROGD_HOZ' => trans('svr-core-lang::validation'),
-            'DATE_V' => trans('svr-core-lang::validation'),
-            'PV' => trans('svr-core-lang::validation'),
-            'RASHOD' => trans('svr-core-lang::validation'),
-            'GM_V' => trans('svr-core-lang::validation'),
-            'ISP' => trans('svr-core-lang::validation'),
-            'DATE_CHIP' => trans('svr-core-lang::validation'),
-            'DATE_NINV' => trans('svr-core-lang::validation'),
-            'DATE_NGOSREGISTER' => trans('svr-core-lang::validation'),
-            'NINV_OTCA' => trans('svr-core-lang::validation'),
-            'NGOSREGISTER_OTCA' => trans('svr-core-lang::validation'),
-            'POR_OTCA' => trans('svr-core-lang::validation'),
-            'NPOR_OTCA' => trans('svr-core-lang::validation'),
-            'DATE_ROGD_OTCA' => trans('svr-core-lang::validation'),
-            'NINV_MATERI' => trans('svr-core-lang::validation'),
-            'NGOSREGISTER_MATERI' => trans('svr-core-lang::validation'),
-            'POR_MATERI' => trans('svr-core-lang::validation'),
-            'NPOR_MATERI' => trans('svr-core-lang::validation'),
-            'DATE_ROGD_MATERI' => trans('svr-core-lang::validation'),
-            'IMPORT_STATUS' => trans('svr-core-lang::validation'),
-            'TASK' => trans('svr-core-lang::validation'),
-            'GUID_SVR' => trans('svr-core-lang::validation'),
-            'ANIMALS_JSON' => trans('svr-core-lang::validation'),
+            'nanimal.integer'           => trans('svr-core-lang::validation.integer'),
+            'nanimal_time'              => trans('svr-core-lang::validation'),
+            'ninv'                      => trans('svr-core-lang::validation'),
+            'klichka'                   => trans('svr-core-lang::validation'),
+            'pol'                       => trans('svr-core-lang::validation'),
+            'npol'                      => trans('svr-core-lang::validation'),
+            'ngosregister'              => trans('svr-core-lang::validation'),
+            'ninv1'                     => trans('svr-core-lang::validation'),
+            'ninv3'                     => trans('svr-core-lang::validation'),
+            'animal_vid'                => trans('svr-core-lang::validation'),
+            'animal_vid_cod'            => trans('svr-core-lang::validation'),
+            'mast'                      => trans('svr-core-lang::validation'),
+            'nmast'                     => trans('svr-core-lang::validation'),
+            'por'                       => trans('svr-core-lang::validation'),
+            'npor'                      => trans('svr-core-lang::validation'),
+            'date_rogd'                 => trans('svr-core-lang::validation'),
+            'date_postupln'             => trans('svr-core-lang::validation'),
+            'nhoz_rogd'                 => trans('svr-core-lang::validation'),
+            'nhoz'                      => trans('svr-core-lang::validation'),
+            'nobl'                      => trans('svr-core-lang::validation'),
+            'nrn'                       => trans('svr-core-lang::validation'),
+            'nident'                    => trans('svr-core-lang::validation'),
+            'rogd_hoz'                  => trans('svr-core-lang::validation'),
+            'date_v'                    => trans('svr-core-lang::validation'),
+            'pv'                        => trans('svr-core-lang::validation'),
+            'rashod'                    => trans('svr-core-lang::validation'),
+            'gm_v'                      => trans('svr-core-lang::validation'),
+            'isp'                       => trans('svr-core-lang::validation'),
+            'date_chip'                 => trans('svr-core-lang::validation'),
+            'date_ninv'                 => trans('svr-core-lang::validation'),
+            'date_ngosregister'         => trans('svr-core-lang::validation'),
+            'ninv_otca'                 => trans('svr-core-lang::validation'),
+            'ngosregister_otca'         => trans('svr-core-lang::validation'),
+            'por_otca'                  => trans('svr-core-lang::validation'),
+            'npor_otca'                 => trans('svr-core-lang::validation'),
+            'date_rogd_otca'            => trans('svr-core-lang::validation'),
+            'ninv_materi'               => trans('svr-core-lang::validation'),
+            'ngosregister_materi'       => trans('svr-core-lang::validation'),
+            'por_materi'                => trans('svr-core-lang::validation'),
+            'npor_materi'               => trans('svr-core-lang::validation'),
+            'date_rogd_materi'          => trans('svr-core-lang::validation'),
+            'import_status'             => trans('svr-core-lang::validation'),
+            'task'                      => trans('svr-core-lang::validation'),
+            'guid_svr'                  => trans('svr-core-lang::validation'),
+            'animals_json'              => trans('svr-core-lang::validation'),
         ];
     }
 }

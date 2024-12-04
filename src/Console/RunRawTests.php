@@ -18,6 +18,7 @@ class RunRawTests extends Command
     {
         $testsuite = $this->argument('testsuite');
 
+        // Конструктор консольной команды
         $process = new Process([
             './vendor/bin/phpunit',
             '--configuration',
