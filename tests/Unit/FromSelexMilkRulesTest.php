@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionClass;
 use Svr\Raw\Models\FromSelexMilk;
 use Tests\TestCase;
 
@@ -28,23 +29,36 @@ class FromSelexMilkRulesTest extends TestCase
     #[DataProvider('provideTestData')]
     public function test_rules_post_method(array $data)
     {
+        echo "test_rules_post_method - Тест rules валидации модели FromSelexMilk.";
+
         //Создадим объект request класса Request
         $request = Request::create(
-            uri: '/v1/selex/get_animals/',
+            uri: '/',
             method: 'post'
         );
         // В $request->input() помещаем входящие данные
         $request->replace($data);
 
         // тестируем метод rulesReturnWithBag в классе FromSelexMilk
-        $dmodel = new FromSelexMilk();
+
+        $fromSelexMilk = new FromSelexMilk();
+
+        // Используем Reflection API для доступа к приватному методу
+        $reflectionClass = new ReflectionClass(FromSelexMilk::class);
+        $method = $reflectionClass->getMethod('validateRequest');
+        $method->setAccessible(true);  // Разрешаем доступ к приватному методу
+
+
+        // $result = $method->invoke($fromSelexMilk, $request);
+
         try {
-            $result = null;
-        // $dmodel->validateRequest($request);
-        // TODO validateRequest приватный в трейте модели. Напрямую не вызвать. Нужно переделать тест
+            // $result = null;
+            $method->invoke($fromSelexMilk, $request);
+
         } catch (ValidationException $e) {
             $result = $e->errors();
         }
+
         // проверяем результат
         // Если валидация прошла успешно, то $result будет равен null
         // assertNull проверяет, что $result равен null, если $result не равен null, то тест провалится с описанием ошибки
