@@ -119,24 +119,25 @@ class FromSelexMilkController extends AdminController
 
                 // Для этих колонок [nanimal_time, ninv, klichka, pol] добавим фильтры в заголовках
                 // link to documentation https://open-admin.org/docs/en/model-grid-filters
-                'nanimal_time', 'pol' => $grid->column($column_name, $value_label)
+                'nanimal_time' => $grid->column($column_name, $value_label)
                     ->help($trans)->filter('ilike'),
-                // 'npol' => $grid->column($column_name, $value_label)
-                //     ->help($trans)->filter(
-                //         [
-                //             0 => 1,
-                //             1 => 4,
-                //         ]
-                //     // $this->get_unique_value(FromSelexMilk::getTableName(), $column_name),
-                //     ),
-                // TODO! Не работает фильтр по списку
+
+                // Фильтр по значению из списка
+                'npol', 'pol', 'animal_vid_cod', 'nmast', 'import_status' => $grid->column($column_name, $value_label)
+                    ->help($trans)->filter(
+                        $this->model::get_array_unique_value($column_name),
+                    ),
+
                 $this->model_obj->getCreatedAtColumn(), $this->model_obj->getUpdatedAtColumn() => $grid
                     ->column($column_name, $value_label)
                     ->display(function ($value) {
                         return Carbon::parse($value);
                     })
                     ->xx_datetime()
-                    ->help($trans)->sortable(),
+                    ->help($trans)
+                    ->sortable()
+                    // Вильтр по диапазону дат
+                    ->filter('range', 'date'),
 
                 // Отображение остальных колонок
                 default => $grid->column($column_name, $value_label)
@@ -329,30 +330,4 @@ class FromSelexMilkController extends AdminController
         });
         return $form;
     }
-
-    /**
-     * Метод для фильтов.
-     * Возвращает массив. Ключ - порядковый номер, значение - значение поля
-     * @param string $table_name
-     * @param string $column_name
-     * @return array
-     */
-    private function get_unique_value(string $table_name, string $column_name): array
-    {
-        return DB::table($table_name)
-            ->select($column_name)
-            ->distinct()
-            ->get()
-            ->filter(function ($item) use ($column_name) {
-                return $item->$column_name; // Отбрасываем значения null
-            })
-            ->keyBy(function ($item, $key) {
-                return $key; // Используем порядковый номер как ключ
-            })
-            ->map(function ($item) use ($column_name) {
-                return $item->$column_name; // Возвращаем значение поля npol
-            })
-            ->toArray();
-    }
-
 }

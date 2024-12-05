@@ -2,25 +2,17 @@
 
 namespace Svr\Raw\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Svr\Core\Enums\ImportStatusEnum;
-use Svr\Core\Traits\GetTableName;
-use Svr\Core\Traits\GetValidationRules;
 
 /**
  * Модель: сырые данные из Селекс для овец
  *
  * @package App\Models\Raw
  */
-class FromSelexSheep extends Model
+class FromSelexSheep extends BaseModel
 {
-    use GetTableName;
-    use HasFactory;
-    use GetValidationRules;
-
 
     /**
      * Точное название таблицы с учетом схемы
@@ -231,7 +223,7 @@ class FromSelexSheep extends Model
             'ninvright_materi'    => 'max:15|nullable',
             'ninvleft_materi'     => 'max:15|nullable',
             'ngosregister_materi' => 'max:50|nullable',
-            'import_status'       => ['nullable', Rule::enum(ImportStatusEnum::class)],
+            'import_status'       => ['nullable',        Rule::enum(ImportStatusEnum::class)],
             'task'                => 'integer|nullable',
             'guid_svr'            => 'max:64|nullable',
             'animals_json'        => 'json|nullable',

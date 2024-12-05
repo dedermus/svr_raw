@@ -115,11 +115,25 @@ class FromSelexBeefController extends AdminController
                 // Индивидуальные настройки для отображения колонок:created_at, updated_at, raw_from_selex_beef_id
                 'raw_from_selex_beef_id' => $grid->column($column_name, 'id')->help($trans)->sortable(),
 
+                // Для этих колонок [nanimal_time, ninv, klichka, pol] добавим фильтры в заголовках
+                // link to documentation https://open-admin.org/docs/en/model-grid-filters
+                'nanimal_time' => $grid->column($column_name, $value_label)
+                    ->help($trans)->filter('ilike'),
+
+                // Фильтр по значению из списка
+                'npol', 'pol', 'animal_vid_cod', 'nmast', 'import_status' => $grid->column($column_name, $value_label)
+                    ->help($trans)->filter(
+                        $this->model::get_array_unique_value($column_name),
+                    ),
+
                 $this->model_obj->getCreatedAtColumn(), $this->model_obj->getUpdatedAtColumn() => $grid
                     ->column($column_name, $value_label)
                     ->display(function ($value) {return Carbon::parse($value);})
                     ->xx_datetime()
-                    ->help($trans)->sortable(),
+                    ->help($trans)
+                    ->sortable()
+                    // Вильтр по диапазону дат
+                    ->filter('range', 'date'),
 
                 // Отображение остальных колонок
                 default => $grid->column($column_name, $value_label)->help($trans),

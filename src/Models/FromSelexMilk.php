@@ -2,24 +2,17 @@
 
 namespace Svr\Raw\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Svr\Core\Enums\ImportStatusEnum;
-use Svr\Core\Traits\GetTableName;
-use Svr\Core\Traits\GetValidationRules;
 
 /**
  * Модель: сырые данные из Селекс для молочных коров
  *
  * @package App\Models\Raw
  */
-class FromSelexMilk extends Model
+class FromSelexMilk extends BaseModel
 {
-    use GetTableName;
-    use HasFactory;
-    use GetValidationRules;
 
     /**
      * Точное название таблицы с учетом схемы
@@ -198,51 +191,51 @@ class FromSelexMilk extends Model
                 $request->isMethod('put') ? 'required' : '',
                 Rule::exists('.' . $this->getTable(), $this->primaryKey),
             ],
-            'nanimal'                     => 'integer|nullable',
-            'nanimal_time'                => 'max:128|nullable',
-            'ninv'                        => 'max:15|nullable',
-            'klichka'                     => 'max:50|nullable',
-            'pol'                         => 'max:30|nullable',
-            'npol'                        => 'integer|nullable',
-            'ngosregister'                => 'max:50|nullable',
-            'ninv1'                       => 'max:15|nullable',
-            'ninv3'                       => 'max:20|nullable',
-            'animal_vid'                  => 'max:50|nullable',
-            'animal_vid_cod'              => 'required|integer',
-            'mast'                        => 'max:30|nullable',
-            'nmast'                       => 'integer|nullable',
-            'por'                         => 'max:30|nullable',
-            'npor'                        => 'integer|nullable',
-            'date_rogd'                   => 'date|nullable',
-            'date_postupln'               => 'date|nullable',
-            'nhoz_rogd'                   => 'integer|nullable',
-            'nhoz'                        => 'integer|nullable',
-            'nobl'                        => 'integer|nullable',
-            'nrn'                         => 'integer|nullable',
-            'nident'                      => 'max:20|nullable',
-            'rogd_hoz'                    => 'max:50|nullable',
-            'date_v'                      => 'date|nullable',
-            'pv'                          => 'max:60|nullable',
-            'rashod'                      => 'max:30|nullable',
-            'gm_v'                        => 'integer|nullable',
-            'isp'                         => 'max:20|nullable',
-            'date_chip'                   => 'date|nullable',
-            'date_ninv'                   => 'date|nullable',
-            'date_ngosregister'           => 'date|nullable',
-            'ninv_otca'                   => 'max:15|nullable',
-            'ngosregister_otca'           => 'max:50|nullable',
-            'por_otca'                    => 'max:30|nullable',
-            'npor_otca'                   => 'integer|nullable',
-            'date_rogd_otca'              => 'date|nullable',
-            'ninv_materi'                 => 'max:15|nullable',
-            'ngosregister_materi'         => 'max:50|nullable',
-            'por_materi'                  => 'max:30|nullable',
-            'npor_materi'                 => 'integer|nullable',
-            'date_rogd_materi'            => 'date|nullable',
-            'import_status'               => ['nullable', Rule::enum(ImportStatusEnum::class)],
-            'task'                        => 'integer|nullable',
-            'guid_svr'                    => 'max:64|nullable',
-            'animals_json'                => 'json|nullable',
+                        'nanimal'             => 'integer|nullable',
+            'nanimal_time'        => 'max:128|nullable',
+            'ninv'                => 'max:15|nullable',
+            'klichka'             => 'max:50|nullable',
+            'pol'                 => 'max:30|nullable',
+            'npol'                => 'integer|nullable',
+            'ngosregister'        => 'max:50|nullable',
+            'ninv1'               => 'max:15|nullable',
+            'ninv3'               => 'max:20|nullable',
+            'animal_vid'          => 'max:50|nullable',
+            'animal_vid_cod'      => 'required|integer',
+            'mast'                => 'max:30|nullable',
+            'nmast'               => 'integer|nullable',
+            'por'                 => 'max:30|nullable',
+            'npor'                => 'integer|nullable',
+            'date_rogd'           => 'date|nullable',
+            'date_postupln'       => 'date|nullable',
+            'nhoz_rogd'           => 'integer|nullable',
+            'nhoz'                => 'integer|nullable',
+            'nobl'                => 'integer|nullable',
+            'nrn'                 => 'integer|nullable',
+            'nident'              => 'max:20|nullable',
+            'rogd_hoz'            => 'max:50|nullable',
+            'date_v'              => 'date|nullable',
+            'pv'                  => 'max:60|nullable',
+            'rashod'              => 'max:30|nullable',
+            'gm_v'                => 'integer|nullable',
+            'isp'                 => 'max:20|nullable',
+            'date_chip'           => 'date|nullable',
+            'date_ninv'           => 'date|nullable',
+            'date_ngosregister'   => 'date|nullable',
+            'ninv_otca'           => 'max:15|nullable',
+            'ngosregister_otca'   => 'max:50|nullable',
+            'por_otca'            => 'max:30|nullable',
+            'npor_otca'           => 'integer|nullable',
+            'date_rogd_otca'      => 'date|nullable',
+            'ninv_materi'         => 'max:15|nullable',
+            'ngosregister_materi' => 'max:50|nullable',
+            'por_materi'          => 'max:30|nullable',
+            'npor_materi'         => 'integer|nullable',
+            'date_rogd_materi'    => 'date|nullable',
+            'import_status'       => ['nullable',        Rule::enum(ImportStatusEnum::class)],
+            'task'                => 'integer|nullable',
+            'guid_svr'            => 'max:64|nullable',
+            'animals_json'        => 'json|nullable',
         ];
     }
 
@@ -256,7 +249,7 @@ class FromSelexMilk extends Model
             // Объединяем все сообщения об ошибках в один массив
             $this->primaryKey . '.required' => trans('svr-core-lang::validation.required'),
             $this->primaryKey . '.exists' => trans('svr-core-lang::validation.exists'),
-            'nanimal'             => trans('svr-core-lang::validation'),
+                        'nanimal'             => trans('svr-core-lang::validation'),
             'nanimal_time'        => trans('svr-core-lang::validation'),
             'ninv'                => trans('svr-core-lang::validation'),
             'klichka'             => trans('svr-core-lang::validation'),
