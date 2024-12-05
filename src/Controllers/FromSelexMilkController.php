@@ -3,6 +3,7 @@
 namespace Svr\Raw\Controllers;
 
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use OpenAdminCore\Admin\Controllers\AdminController;
 use OpenAdminCore\Admin\Facades\Admin;
 use OpenAdminCore\Admin\Form;
@@ -60,7 +61,7 @@ class FromSelexMilkController extends AdminController
     /**
      * Edit interface.
      *
-     * @param string  $id
+     * @param string $id
      * @param Content $content
      *
      * @return Content
@@ -76,7 +77,7 @@ class FromSelexMilkController extends AdminController
     /**
      * Show interface.
      *
-     * @param string  $id
+     * @param string $id
      * @param Content $content
      *
      * @return Content
@@ -106,6 +107,8 @@ class FromSelexMilkController extends AdminController
         // Определение порядка сортировки по убыванию
         // link to documentation https://open-admin.org/docs/en/model-grid-column#list-order-order-by
         $grid->model()->orderBy($grid->getKeyName(), 'desc');
+
+        // dd((array)DB::table(FromSelexMilk::getTableName(), 'npol')->select('npol')->distinct()->get());
         foreach ($this->all_columns as $column_name) {
             $value_label = $column_name;
             $trans = trans($this->trans . $column_name);
@@ -114,6 +117,19 @@ class FromSelexMilkController extends AdminController
                 $grid->getKeyName() => $grid->column($column_name, 'id')
                     ->help($trans)->sortable(),
 
+                // Для этих колонок [nanimal_time, ninv, klichka, pol] добавим фильтры в заголовках
+                // link to documentation https://open-admin.org/docs/en/model-grid-filters
+                'nanimal_time', 'pol' => $grid->column($column_name, $value_label)
+                    ->help($trans)->filter('ilike'),
+                // 'npol' => $grid->column($column_name, $value_label)
+                //     ->help($trans)->filter(
+                //         [
+                //             0 => 1,
+                //             1 => 4,
+                //         ]
+                //     // $this->get_unique_value(FromSelexMilk::getTableName(), $column_name),
+                //     ),
+                // TODO! Не работает фильтр по списку
                 $this->model_obj->getCreatedAtColumn(), $this->model_obj->getUpdatedAtColumn() => $grid
                     ->column($column_name, $value_label)
                     ->display(function ($value) {
@@ -313,4 +329,30 @@ class FromSelexMilkController extends AdminController
         });
         return $form;
     }
+
+    /**
+     * Метод для фильтов.
+     * Возвращает массив. Ключ - порядковый номер, значение - значение поля
+     * @param string $table_name
+     * @param string $column_name
+     * @return array
+     */
+    private function get_unique_value(string $table_name, string $column_name): array
+    {
+        return DB::table($table_name)
+            ->select($column_name)
+            ->distinct()
+            ->get()
+            ->filter(function ($item) use ($column_name) {
+                return $item->$column_name; // Отбрасываем значения null
+            })
+            ->keyBy(function ($item, $key) {
+                return $key; // Используем порядковый номер как ключ
+            })
+            ->map(function ($item) use ($column_name) {
+                return $item->$column_name; // Возвращаем значение поля npol
+            })
+            ->toArray();
+    }
+
 }
