@@ -25,7 +25,7 @@ return [
         //животное - вид животного
         'animal_vid' => '1i9CX7AiLqk7ydMP2wslt2l7F5ltbinOj11dDnFrLx7b9RH0Jd',
         //животное - код вида животного (КРС - 26 / Овцы - 17)
-        'animal_vid_cod' => 32767,
+        'animal_vid_cod' => 26,
         //животное - масть
         'mast' => 'yhSpCmNTqNk0OcSF0zSfATE8E7FJYW',
         //животное - код масти

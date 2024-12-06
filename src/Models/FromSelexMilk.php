@@ -2,9 +2,12 @@
 
 namespace Svr\Raw\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Svr\Core\Enums\ImportStatusEnum;
+use Svr\Core\Traits\GetTableName;
+use Svr\Core\Traits\GetValidationRules;
 
 /**
  * Модель: сырые данные из Селекс для молочных коров
@@ -13,6 +16,10 @@ use Svr\Core\Enums\ImportStatusEnum;
  */
 class FromSelexMilk extends BaseModel
 {
+    use GetTableName;
+    use HasFactory;
+    use GetValidationRules;
+    // TODO треиты перенесены, т.к. треиты наследуемые из BaseModel не работают(ломают) тесты метода validateRequest
 
     /**
      * Точное название таблицы с учетом схемы
@@ -191,7 +198,7 @@ class FromSelexMilk extends BaseModel
                 $request->isMethod('put') ? 'required' : '',
                 Rule::exists('.' . $this->getTable(), $this->primaryKey),
             ],
-                        'nanimal'             => 'integer|nullable',
+            'nanimal'             => 'integer|nullable',
             'nanimal_time'        => 'max:128|nullable',
             'ninv'                => 'max:15|nullable',
             'klichka'             => 'max:50|nullable',

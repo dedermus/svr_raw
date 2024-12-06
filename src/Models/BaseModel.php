@@ -10,7 +10,6 @@ use Svr\Core\Traits\GetValidationRules;
 
 /**
  * Базовая модель
- *
  * @package Svr\Raw\Models
  */
 class BaseModel extends Model
