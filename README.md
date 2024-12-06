@@ -69,10 +69,13 @@ git tag
 
 ### Tests
 [docs](https://docs.phpunit.de/en/10.5/index.html)
+
+Запуск через artisan
 ```
 php artisan test --configuration=./vendor/svr/raw/phpunit.xml --testsuite=all
 ```
 
+Запуск напрямую PHPUnit  
 ```
 php artisan svr/raw:tests all
 ```
