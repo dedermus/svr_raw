@@ -19,7 +19,6 @@ class FromSelexSheep extends BaseModel
     use GetTableName;
     use HasFactory;
     use GetValidationRules;
-    // TODO треиты перенесены, т.к. треиты наследуемые из BaseModel не работают(ломают) тесты метода validateRequest
 
     /**
      * Точное название таблицы с учетом схемы

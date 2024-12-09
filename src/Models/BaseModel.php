@@ -14,11 +14,6 @@ use Svr\Core\Traits\GetValidationRules;
  */
 class BaseModel extends Model
 {
-    use GetTableName;
-    use HasFactory;
-    use GetValidationRules;
-
-
     /**
      * Возвращает массив уникальных значений.
      * Где ключ - порядковый номер, значение - уникальное значение поля таблицы
