@@ -3,7 +3,9 @@
 namespace Svr\Raw\Controllers;
 
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use OpenAdminCore\Admin\Controllers\AdminController;
 use OpenAdminCore\Admin\Facades\Admin;
 use OpenAdminCore\Admin\Form;
@@ -125,9 +127,13 @@ class FromSelexMilkController extends AdminController
                 // Фильтр по значению из списка
                 'npol', 'pol', 'animal_vid_cod', 'nmast', 'import_status' => $grid->column($column_name, $value_label)
                     ->help($trans)->filter(
-                        $this->model::get_array_unique_value($column_name),
-                    ),
+                        // $this->model::get_array_unique_value($column_name),
 
+                        // Вариант с кешированием
+                        cache()->remember($this->model::getTableName() . '_array_collumn_' . $column_name . '_unique_value', 10, function () use ($column_name) {
+                            return $this->model::get_array_unique_value($column_name);
+                        }),
+                    ),
                 $this->model_obj->getCreatedAtColumn(), $this->model_obj->getUpdatedAtColumn() => $grid
                     ->column($column_name, $value_label)
                     ->display(function ($value) {
