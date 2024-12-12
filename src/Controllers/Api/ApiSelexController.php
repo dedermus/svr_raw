@@ -129,11 +129,6 @@ class ApiSelexController extends Controller
             'user_id' => $current_user['user_id'],
             'response_resource_data' => SelexLoginResource::class,
             'response_resource_dictionary' => false,
-            'pagination' => [
-                'total_records' => 1,
-                'cur_page' => 1,
-                'per_page' => 1
-            ],
         ]);
 
         return new SvrApiResponseResource($data);
@@ -206,12 +201,34 @@ class ApiSelexController extends Controller
             'user_id' => $current_user['user_id'],
             'response_resource_data' => SelexSendAnimalsCollection::class,
             'response_resource_dictionary' => false,
-            'pagination' => [
-                'total_records' => 1,
-                'cur_page' => 1,
-                'per_page' => 1
-            ],
         ]);
+
+        return new SvrApiResponseResource($data);
+    }
+
+    /**
+     * Получение данных из СВР со стороны модуля обмена
+     */
+    public function selexGetAnimals(Request $request): SvrApiResponseResource
+    {
+        // Проверка входящих данных
+        $request->validate([
+            'list_animals_guid_svr' => 'required|array',
+        ], [
+            'list_animals_guid_svr.required' => 'Поле list_animals_guid_svr обязательно для заполнения',
+            'list_animals_guid_svr.array' => 'Поле list_animals_guid_svr должно быть массивом',
+        ]);
+
+        $current_user = auth()->user();
+
+        $data = [
+            'status' => true,
+            'message' => 'Операция выполнена',
+            'data' => $this->get_animals_list_from_different_list_guid_svr($request, $current_user['company_location_id']),
+            'response_resource_data' => SelexGetAnimalsCollection::class,
+            'user_id' => $current_user['user_id'],
+            'response_resource_dictionary' => false,
+        ];
 
         return new SvrApiResponseResource($data);
     }
@@ -378,38 +395,6 @@ class ApiSelexController extends Controller
         return $list_fields;
     }
 
-
-    /**
-     * Получение данных из СВР со стороны модуля обмена
-     */
-    public function selexGetAnimals(Request $request): SvrApiResponseResource
-    {
-        // Проверка входящих данных
-        $request->validate([
-            'list_animals_guid_svr' => 'required|array',
-        ], [
-            'list_animals_guid_svr.required' => 'Поле list_animals_guid_svr обязательно для заполнения',
-            'list_animals_guid_svr.array' => 'Поле list_animals_guid_svr должно быть массивом',
-        ]);
-
-        $current_user = auth()->user();
-
-        $data = [
-            'status' => true,
-            'message' => 'Операция выполнена',
-            'result_animals' => $this->get_animals_list_from_different_list_guid_svr($request, $current_user['company_location_id']),
-            'response_resource_data' => SelexGetAnimalsCollection::class,
-            'user_id' => $current_user['user_id'],
-            'response_resource_dictionary' => false,
-            'pagination' => [
-                'total_records' => 1,
-                'cur_page' => 1,
-                'per_page' => 1
-            ],
-        ];
-
-        return SvrApiResponseResource::make($data);
-    }
 
 
     /**

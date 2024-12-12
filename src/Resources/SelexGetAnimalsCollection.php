@@ -4,6 +4,7 @@ namespace Svr\Raw\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 
 class SelexGetAnimalsCollection extends JsonResource
 {
@@ -13,19 +14,18 @@ class SelexGetAnimalsCollection extends JsonResource
      * @return array<string, mixed>
      */
 
-    public function toArray(Request $request): array
+    public function toArray(Request $request): Collection
     {
         // Получаем массив по ключу list_animals из ресурсов
         // $listAnimals = $this->list_animals;
-        $listAnimals = $this->resource["result_animals"];
-
+        $listAnimals = $this->resource["data"];
         // Форматируем каждый элемент массива по ресурсу SelexSendAnimalsResource
         $formattedListAnimals = collect($listAnimals)->map(function ($item) {
-            return new SelexGetAnimalsResource($item);
+            return SelexGetAnimalsResource::make($item);
         });
 
-        return [
+        return
             $formattedListAnimals
-        ];
+        ;
     }
 }
