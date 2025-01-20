@@ -15,6 +15,15 @@ use Svr\Core\Traits\GetValidationRules;
 class BaseModel extends Model
 {
     /**
+     * Получить первичный ключ
+     * @return string
+     */
+    public function getPrimaryKey(): string
+    {
+        return $this->primaryKey;
+    }
+
+    /**
      * Возвращает массив уникальных значений.
      * Где ключ - порядковый номер, значение - уникальное значение поля таблицы
      *

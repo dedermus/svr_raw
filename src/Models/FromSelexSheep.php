@@ -72,7 +72,6 @@ class FromSelexSheep extends BaseModel
      */
     public $timestamps = true;
 
-
     /**
      * Создать запись
      *

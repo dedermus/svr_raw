@@ -4,6 +4,7 @@ namespace Svr\Raw\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Svr\Core\Enums\ImportStatusEnum;
+use Svr\Core\Enums\SystemTaskEnum;
 use Svr\Raw\Models\FromSelexBeef;
 
 
@@ -27,7 +28,7 @@ class FromSelexBeefFactory extends Factory
     {
         return [
         "nanimal"             => $this->faker->randomNumber(9, true) . $this->faker->randomNumber(4, true),     // "животное - уникальный идентификатор"
-        "nanimal_time"        => $this->faker->randomNumber(9, true) . $this->faker->randomNumber(4, true),     // "животное - уникальный идентификатор (наверное...)"
+        "nanimal_time"        => $this->faker->randomNumber(9, true) . $this->faker->randomNumber(6, true),     // "животное - уникальный идентификатор (наверное...)"
         "ninv"                => $this->faker->randomNumber(5, true),                                                             // "животное - инвентарный номер"
         "klichka"             => $this->faker->word(),                                                                                              // "животное - кличка"
         "pol"                 => "Корова",                                                                                                          // "животное - пол"
@@ -43,10 +44,10 @@ class FromSelexBeefFactory extends Factory
         "npor"                => $this->faker->randomNumber(2),                                                                           // "животное - код породы"
         "date_rogd"           => $this->faker->date(),                                                                                              // "животное - дата рождения в формате YYYY.mm.dd"
         "date_postupln"       => $this->faker->date(),                                                                                              // "животное - дата поступления в формате YYYY.mm.dd"
-        "nhoz_rogd"           => $this->faker->randomNumber(6),                                                                           // "животное - хозяйство рождения (базовый индекс хозяйства)"
-        "nhoz"                => $this->faker->randomNumber(6),                                                                           // "животное - базовый индекс хозяйства (текущее хозяйство)"
-        "nobl"                => $this->faker->randomNumber(2),                                                                           // "животное - внутренний код области хозяйства (текущее хозяйство)"
-        "nrn"                 => $this->faker->randomNumber(4),                                                                           // "животное - внутренний код района хозяйства (текущее хозяйство)"
+        "nhoz_rogd"           => '1874040', //$this->faker->randomNumber(6),                                                                           // "животное - хозяйство рождения (базовый индекс хозяйства)"
+        "nhoz"                => '1874040', //$this->faker->randomNumber(6),                                                                           // "животное - базовый индекс хозяйства (текущее хозяйство)"
+        "nobl"                => 6, //$this->faker->randomNumber(2),                                                                           // "животное - внутренний код области хозяйства (текущее хозяйство)"
+        "nrn"                 => 11, //$this->faker->randomNumber(4),                                                                           // "животное - внутренний код района хозяйства (текущее хозяйство)"
         "nident"              => "RU".$this->faker->randomNumber(4)."a".$this->faker->randomNumber(4),                          // "животное - импортный идентификатор"
         "rogd_hoz"            => "Россия",                                                                                                          // "животное - хозяйство рождения (название)"
         "date_v"              => $this->faker->date(),                                                                                              // "животное - дата выбытия в формате YYYY.mm.dd"
@@ -67,8 +68,8 @@ class FromSelexBeefFactory extends Factory
         "por_materi"          => $this->faker->randomElement(["Герефордская", "Абердин ангусская"]),                                         // "мать - порода"
         "npor_materi"         => $this->faker->randomNumber(2),                                                                           // "мать - код породы"
         "date_rogd_materi"    => $this->faker->date(),                                                                                              // "мать - дата рождения в формате YYYY.mm.dd"
-        "import_status"       => $this->faker->randomElement(ImportStatusEnum::get_value_list()),                                            // "ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)"
-        "task"                => 6,                                                                                                                 // "код задачи берется из таблицы TASKS.NTASK (1 – молоко / 6- мясо / 4 - овцы"
+        "import_status"       => ImportStatusEnum::NEW->value, //$this->faker->randomElement(ImportStatusEnum::get_value_list()),                                            // "ENUM - состояние обработки записи (new - новая / in_progress - в процессе / error - ошибка / completed - обработана)"
+        "task"                => SystemTaskEnum::BEEF->value, //6,                                                                                                                 // "код задачи берется из таблицы TASKS.NTASK (1 – молоко / 6- мясо / 4 - овцы"
         "guid_svr"            => $this->faker->uuid(),                                                                                              // "гуид животного, который генерирует СВР в момент создания этой записи"
         "animals_json" => json_encode([
             "nident" => "RU".$this->faker->randomNumber(4)."a".$this->faker->randomNumber(4),

@@ -61,15 +61,6 @@ class FromSelexMilk extends BaseModel
     ];
 
     /**
-     * Получить первичный ключ
-     * @return string
-     */
-    public function getPrimaryKey(): string
-    {
-        return $this->primaryKey;
-    }
-
-    /**
      * Формат хранения столбцов даты модели.
      *
      * @var string
@@ -80,7 +71,6 @@ class FromSelexMilk extends BaseModel
      * @var bool
      */
     public $timestamps = true;
-
 
     /**
      * Создать запись

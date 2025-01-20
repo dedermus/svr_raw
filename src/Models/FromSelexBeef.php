@@ -72,7 +72,6 @@ class FromSelexBeef extends BaseModel
      */
     public $timestamps = true;
 
-
     /**
      * Создать запись
      *
